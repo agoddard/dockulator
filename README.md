@@ -42,9 +42,9 @@ Each calculator must adhere to the same API.
 ## WebServer API
 
     GET  /                 -- Home page
-    GET  /calculations     -- Returns all calculations
-    POST /calculations    -- Creates a new calculation in MongoDB
-    PUT  /calculations/:id -- Updates a document in MongoDB
+    GET  /calculations     -- Calculation list view
+    GET  /calculations/:id -- Calculation detail view
+    POST /calculations     -- Creates a new calculation in MongoDB
 
 
 ## Calculation Model
