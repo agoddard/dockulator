@@ -13,6 +13,13 @@ MVP - use shell-out and then switch to HTTP/API later
 ####docker receives request for OS/language, runs request, responds via HTTP PUT to ?
     PUT data-->Mongo unique ID, request ID, metadata, calculation response
 
+## Basic Stack
+
+Webserver: [Go](http://golang.org) -- Handles UI, creation of calculation objects and display of completed calculations
+Datastore: [MongoDB](http://mongodb.org) -- Stores data
+Middleware: [Ruby](http://ruby-lang.org) -- Looks for empty calculations and passes them off to Docker
+Containerization: [Docker](http://docker.io) -- Does calculation
+
 ## Use Case
 
 1. Bianca goes to dockulator.com
