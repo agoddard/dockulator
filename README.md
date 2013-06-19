@@ -15,10 +15,10 @@ MVP - use shell-out and then switch to HTTP/API later
 
 ## Basic Stack
 
-Webserver: [Go](http://golang.org) -- Handles UI, creation of calculation objects and display of completed calculations
-Datastore: [MongoDB](http://mongodb.org) -- Stores data
-Middleware: [Ruby](http://ruby-lang.org) -- Looks for empty calculations and passes them off to Docker
-Containerization: [Docker](http://docker.io) -- Does calculation
+* Webserver: [Go](http://golang.org) -- Handles UI, creation of calculation objects and display of completed calculations
+* Datastore: [MongoDB](http://mongodb.org) -- Stores data
+* Middleware: [Ruby](http://ruby-lang.org) -- Looks for empty calculations and passes them off to Docker
+* Containerization: [Docker](http://docker.io) -- Does calculation
 
 ## Use Case
 
