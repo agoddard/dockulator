@@ -17,8 +17,8 @@ MVP - use shell-out and then switch to HTTP/API later
 
 Each calculator must adhere to the same API.
 
-   Accepts input from STDIN
-   Responds with input on STDOUT
+    Accepts input from STDIN
+    Responds with input on STDOUT
 
 ## Basic Stack
 
