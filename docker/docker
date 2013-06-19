@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "{"id": "hr9834hingrg","id": 1,"os": "testos","metadata": "so cool","language": "testlanguage","answer": `date`}"

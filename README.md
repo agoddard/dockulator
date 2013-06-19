@@ -25,6 +25,7 @@ dockulator
 
 ####docker middleware polls redis for calculations with no answer
 ####docker middleware receives a calculation, spins up random docker OS/language combination
+MVP - use shell-out and then switch to HTTP/API later
 ####docker receives request for OS/language, runs request, responds via HTTP PUT to ?
     PUT data-->Mongo unique ID, request ID, metadata, calculation response
 
