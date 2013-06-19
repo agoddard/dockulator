@@ -27,19 +27,19 @@ MVP - use shell-out and then switch to HTTP/API later
 
 ## WebServer API
 
-    GET /                 -- Home page
-    GET /calculations     -- Returns all calculations
+    GET  /                 -- Home page
+    GET  /calculations     -- Returns all calculations
     POST /calculations    -- Creates a new calculation in MongoDB
-    PUT /calculations/:id -- Updates a document in MongoDB
+    PUT  /calculations/:id -- Updates a document in MongoDB
 
 
 ## Calculation Model
 
     {
       "Calculation": "1 + 4",
-      "_id": 23ab235feeda31098,
-      "OS": null,        // until complete
-      "Language": null,  // until complete
-      "Answer": null,    // until complete
-      "Time": //some timestamp
+      "_id":         23ab235feeda31098,
+      "OS":          null, // until complete
+      "Language":    null, // until complete
+      "Answer":      null, // until complete
+      "Time":        1234932849028342
     }
