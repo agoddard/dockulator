@@ -20,6 +20,13 @@ MVP - use shell-out and then switch to HTTP/API later
 * Middleware: [Ruby](http://ruby-lang.org) -- Looks for empty calculations and passes them off to Docker
 * Containerization: [Docker](http://docker.io) -- Does calculation
 
+# Calculator APIs
+
+Each calculator must adhere to the same API.
+
+   Accepts input from STDIN
+   Responds with input on STDOUT
+
 ## Use Case
 
 1. Bianca goes to dockulator.com
