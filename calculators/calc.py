@@ -1,5 +1,4 @@
 import sys
-import os
 import operator
 
 operator_dict = {
@@ -11,10 +10,10 @@ operator_dict = {
 
 def main():
     left, op, right = sys.argv[1].split()
-    print(operator_dict[op](int(left), int(right)))
+    answer = operator_dict[op](int(left), int(right))
 
-    print(sys.argv[2])
-    print(os.popen('hostname').read()),
+    print answer
+    
 
 if __name__ == "__main__":
     main()
