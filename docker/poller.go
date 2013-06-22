@@ -1,5 +1,7 @@
 package main
 
+// TODO: OS => human readable OS
+
 import (
 	"fmt"
 	calc "calculations/calculations"
@@ -12,8 +14,9 @@ import (
 )
 
 const (
-	dockerPath = "docker"
-	maxJobs = 5
+	dockerPath = "docker" // FIXME: should be full path to docker binary
+	maxJobs = 5 // Run this many `docker` processes concurrently
+	pollDelay = 2 // in seconds
 )
 
 var throttle = make(chan int, maxJobs)
@@ -45,7 +48,7 @@ func main () {
 			job.OS = PickString(oses)
 			jobs <- job
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(pollDelay * time.Second)
 	}
 }
 
@@ -70,8 +73,6 @@ func StartJob(calculation calc.Calculation) {
 		"\"" + calculation.Calculation + "\"",
 		"--id=" + calculation.OS,
 	}
-	// delete me
-	time.Sleep(1 * time.Second)
 	cmd := exec.Command(dockerPath, args...)
 	out, err := cmd.Output()
 	if err != nil {
@@ -84,5 +85,6 @@ func StartJob(calculation calc.Calculation) {
 		log.Printf("Could not convert answer to integer")
 	}
 	calculation.Answer = answer
+	calculation.Instance = calculation.OS
 	calculation.Save(c)
 }
