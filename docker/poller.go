@@ -1,6 +1,7 @@
 package main
 
 // TODO: OS => human readable OS
+// TODO: if the return value from the program is an error, send the calculation into an error state
 
 import (
 	"fmt"
@@ -82,6 +83,7 @@ func StartJob(calculation calc.Calculation) {
 	// update answer
 	answer, err := strconv.Atoi(string(out))
 	if err != nil {
+		// send the calculation into the error state here.
 		log.Printf("Could not convert answer to integer")
 	}
 	calculation.Answer = answer
