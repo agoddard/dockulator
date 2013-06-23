@@ -3,6 +3,13 @@ dockulator
 
 dockulator
 
+## Compiling
+
+Having a go compiler compiled to build linux binaries is required for building linux binaries.
+I found running `brew uninstall go && brew install go --cross-compile-common` worked well.
+Then simply run `make linux` for linux binaries and `make` for local binaries.
+
+
 ####user hits web server
 ####user enters a calculation
 ####calculation is stored in mongo as follows:
@@ -69,3 +76,4 @@ In this model, the poller will request an instance from docker and wait for the 
 In this model, the poller adds the '-d' flag to the docker command, which will daemonize the docker instance and return an ID. The poller will record this ID and then update the MongoDB calculation with this instance ID. When the instance has completed the calculation, the instance itself will update the calculation in MongoDB. This could be done either by implementing an HTTP or MongoDB call in each calculator, or by having the calculator send its results to a local go script which takes care of the mongo connection (this script might just recieve a json string from the calculator and an ID)
 
 ## UI
+
