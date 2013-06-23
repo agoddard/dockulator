@@ -1,2 +1,2 @@
 #!/bin/bash
-echo $1 | bc
+echo $1 | bc -l
