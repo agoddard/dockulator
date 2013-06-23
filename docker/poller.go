@@ -2,6 +2,7 @@ package main
 
 // TODO: OS => human readable OS
 // TODO: if the return value from the program is an error, send the calculation into an error state
+// TODO: option for docker args, full command will be `docker run $os /opt/dockulator/calculattors/calc.$language '$calc'
 
 import (
 	"fmt"
