@@ -5,7 +5,7 @@ package main
 
 import (
 	"fmt"
-	calc "calculations/calculations"
+	calc "github.com/ChuckHa/calculations/calculations"
 	"labix.org/v2/mgo/bson"
 	"os/exec"
 	"log"
