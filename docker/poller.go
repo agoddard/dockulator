@@ -70,8 +70,7 @@ func ThrottledJobs(jobs chan calc.Calculation) {
 func StartJob(calculation calc.Calculation) {
 	// Do all of this in a goroutine
 	args := []string {
-		"run ",
-		"/opt/dockulator/calculators/calc." + calculation.Language + "\"" + calculation.Calculation + "\"",
+		"run " + calculation.OS + " /opt/dockulator/calculators/calc." + calculation.Language + " \"" + calculation.Calculation + "\"",
 	}
 	cmd := exec.Command(dockerPath, args...)
 	out, err := cmd.Output()
