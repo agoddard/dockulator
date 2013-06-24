@@ -22,8 +22,8 @@ const (
 )
 
 var throttle = make(chan int, maxJobs)
-var oses = []string{"jdoi34j", "djwoief", "fj93jg4", "jfio23jf"}
-var languages = []string{"rb", "pl", "py", "sh"}
+var oses = []string{"2b0268bd2e5b"}
+var languages = []string{"sh"}
 var c = calc.GetCollection()
 
 func init () {
