@@ -5,7 +5,6 @@ package main
 // TODO: option for docker args, full command will be `docker run $os /opt/dockulator/calculattors/calc.$language '$calc'
 
 import (
-	"fmt"
 	calc "github.com/ChuckHa/calculations/calculations"
 	"labix.org/v2/mgo/bson"
 	"log"
@@ -49,9 +48,9 @@ func main() {
 	go ThrottledJobs(jobs)
 
 	for {
-		fmt.Println("Polling Mongo")
+		log.Printf("Polling Mongo")
 		c.Find(bson.M{"instance": ""}).All(&result)
-		fmt.Printf("Found %d calculations\n", len(result))
+		log.Printf("Found %d calculations\n", len(result))
 
 		for i := 0; i < len(result); i++ {
 			job := result[i]
@@ -70,7 +69,7 @@ func PickString(slice []string) string {
 func ThrottledJobs(jobs chan calc.Calculation) {
 	for job := range jobs {
 		<-throttle
-		fmt.Printf("Processing %s using %s on %s\n", job.Calculation, job.Language, job.OS)
+		log.Printf("Processing %s using %s on %s\n", job.Calculation, job.Language, job.OS)
 		go StartJob(job)
 		throttle <- 1
 	}
@@ -79,7 +78,7 @@ func ThrottledJobs(jobs chan calc.Calculation) {
 func StartJob(calculation calc.Calculation) {
 	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc."+calculation.Language, " \"", calculation.Calculation, "\"")
 	if debug {
-		fmt.Printf("Command: %v\n", strings.Join(cmd.Args, " "))
+		log.Printf("Command: %v", strings.Join(cmd.Args, " "))
 	}
 	out, err := cmd.Output()
 	if err != nil {
@@ -90,7 +89,7 @@ func StartJob(calculation calc.Calculation) {
 	answer, err := strconv.Atoi(string(out))
 	if err != nil {
 		// send the calculation into the error state here.
-		log.Printf("Could not convert answer to integer")
+		log.Printf("Could not convert answer to integer: %v", err)
 	}
 	calculation.Answer = answer
 	calculation.Instance = calculation.OS
