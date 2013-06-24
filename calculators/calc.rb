@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 left, op, right = ARGV[0].split
 
 allowed = ["+","-","*","/"]
