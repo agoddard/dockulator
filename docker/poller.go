@@ -8,35 +8,44 @@ import (
 	"fmt"
 	calc "github.com/ChuckHa/calculations/calculations"
 	"labix.org/v2/mgo/bson"
-	"os/exec"
 	"log"
 	"math/rand"
-	"time"
+	"os/exec"
 	"strconv"
+	"time"
+	"flag"
+	"strings"
 )
 
 const (
 	dockerPath = "docker" // FIXME: should be full path to docker binary
-	maxJobs = 5 // Run this many `docker` processes concurrently
-	pollDelay = 2 // in seconds
+	maxJobs    = 5        // Run this many `docker` processes concurrently
+	pollDelay  = 2        // in seconds
 )
 
-var throttle = make(chan int, maxJobs)
-var oses = []string{"2b0268bd2e5b"}
-var languages = []string{"sh"}
-var c = calc.GetCollection()
+var (
+	throttle  = make(chan int, maxJobs)
+	oses      = []string{"2b0268bd2e5b"}
+	languages = []string{"sh"}
+	c         = calc.GetCollection()
+	debug bool
+)
 
-func init () {
+func init() {
 	for i := 0; i < maxJobs; i++ {
 		throttle <- 1
 	}
+
+	flag.BoolVar(&debug, "debug", false, "set --debug to debug the docker output")
 }
 
-func main () {
-	rand.Seed( time.Now().UTC().UnixNano())
+func main() {
+	flag.Parse()
+
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	var result []calc.Calculation
-    jobs := make(chan calc.Calculation)
+	jobs := make(chan calc.Calculation)
 	go ThrottledJobs(jobs)
 
 	for {
@@ -55,11 +64,11 @@ func main () {
 }
 
 func PickString(slice []string) string {
-	return slice[rand.Int() % len(slice)]
+	return slice[rand.Int()%len(slice)]
 }
 
 func ThrottledJobs(jobs chan calc.Calculation) {
-	for job := range jobs{
+	for job := range jobs {
 		<-throttle
 		fmt.Printf("Processing %s using %s on %s\n", job.Calculation, job.Language, job.OS)
 		go StartJob(job)
@@ -68,8 +77,10 @@ func ThrottledJobs(jobs chan calc.Calculation) {
 }
 
 func StartJob(calculation calc.Calculation) {
-	// Do all of this in a goroutine
-	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc." + calculation.Language, " \"", calculation.Calculation, "\"")
+	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc."+calculation.Language, " \"", calculation.Calculation, "\"")
+	if debug {
+		fmt.Printf("Command: %v\n", strings.Join(cmd.Args, " "))
+	}
 	out, err := cmd.Output()
 	if err != nil {
 		log.Printf("Error from docker command: %s\n", err)
