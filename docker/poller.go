@@ -78,19 +78,20 @@ func ThrottledJobs(jobs chan calc.Calculation) {
 func StartJob(calculation calc.Calculation) {
 	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc."+calculation.Language, "\"", calculation.Calculation, "\"")
 	if debug {
-		log.Printf("path: %v", cmd.Path)
 		log.Printf("args: %v", strings.Join(cmd.Args, " "))
+		log.Println(cmd)
 	}
 	out, err := cmd.Output()
 	if err != nil {
 		log.Printf("Error from docker command: %s\n", err)
 	}
-	log.Println(string(out))
+	log.Printf("Value returned from docker: %v", string(out))
 	// update answer
 	answer, err := strconv.Atoi(string(out))
 	if err != nil {
 		// send the calculation into the error state here.
 		log.Printf("Could not convert answer to integer: %v", err)
+		return
 	}
 	calculation.Answer = answer
 	calculation.Instance = calculation.OS
