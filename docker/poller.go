@@ -76,7 +76,7 @@ func ThrottledJobs(jobs chan calc.Calculation) {
 }
 
 func StartJob(calculation calc.Calculation) {
-	cmd := exec.Command("/bin/sh", "-c", "'" + dockerPath + " run " + calculation.OS + " /opt/dockulator/calculators/calc."+calculation.Language+ " \"" + calculation.Escaped() +  "\"'")
+	cmd := exec.Command("/bin/sh", "-c", "'" + dockerPath + " run " + calculation.OS + " /opt/dockulator/calculators/calc."+calculation.Language+ " \"" + calculation.Calculation +  "\"'")
 	if debug {
 		log.Printf("args: %v", strings.Join(cmd.Args, " "))
 		log.Println(cmd)
