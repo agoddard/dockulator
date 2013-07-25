@@ -82,7 +82,7 @@ func StartJob(calculation calc.Calculation) {
 		log.Printf("args: %v", strings.Join(cmd.Args, " "))
 		log.Println(cmd)
 	}
-	out, err := cmd.Output()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("Error from docker command: %s\n", err.Error())
 	}
