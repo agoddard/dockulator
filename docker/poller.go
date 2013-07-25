@@ -10,7 +10,7 @@ import (
 	"log"
 	"math/rand"
 	"os/exec"
-//	"strconv"
+	"strconv"
 	"time"
 	"flag"
 	"strings"
@@ -76,8 +76,7 @@ func ThrottledJobs(jobs chan calc.Calculation) {
 }
 
 func StartJob(calculation calc.Calculation) {
-	//cmd := exec.Command("/bin/sh", "-c", "'" + dockerPath + " run " + calculation.OS + " /opt/dockulator/calculators/calc."+calculation.Language+ " \"" + calculation.Calculation +  "\"'")
-	cmd := exec.Command("sh", "-c", "'" +  dockerPath, "run", calculation.OS, "date" + "'")
+	cmd := exec.Command("/bin/sh", "-c", "\"" + dockerPath + " run " + calculation.OS + " /opt/dockulator/calculators/calc."+calculation.Language+ " '" + calculation.Calculation +  "'\"")
 	if debug {
 		log.Printf("args: %v", strings.Join(cmd.Args, " "))
 		log.Println(cmd)
@@ -88,7 +87,6 @@ func StartJob(calculation calc.Calculation) {
 	}
 	log.Printf("Value returned from docker: %v", string(out))
 	// update answer
-	/*
 	answer, err := strconv.Atoi(string(out))
 	if err != nil {
 		// send the calculation into the error state here.
@@ -98,5 +96,4 @@ func StartJob(calculation calc.Calculation) {
 	calculation.Answer = answer
 	calculation.Instance = calculation.OS
 	calculation.Save(c)
-	*/
 }
