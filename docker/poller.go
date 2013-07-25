@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	dockerPath = "/usr/local/bin/docker" // FIXME: should be full path to docker binary
+	dockerPath = "/usr/local/bin/docker"
 	maxJobs    = 5        // Run this many `docker` processes concurrently
 	pollDelay  = 2        // in seconds
 )
@@ -76,9 +76,10 @@ func ThrottledJobs(jobs chan calc.Calculation) {
 }
 
 func StartJob(calculation calc.Calculation) {
-	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc."+calculation.Language, " \"", calculation.Calculation, "\"")
+	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc."+calculation.Language, "\"", calculation.Calculation, "\"")
 	if debug {
-		log.Printf("Command: %v", strings.Join(cmd.Args, " "))
+		log.Printf("path: %v", cmd.Path)
+		log.Printf("args: %v", strings.Join(cmd.Args, " "))
 	}
 	out, err := cmd.Output()
 	if err != nil {
