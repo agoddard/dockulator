@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	dockerPath = "docker" // FIXME: should be full path to docker binary
+	dockerPath = "/usr/local/bin/docker" // FIXME: should be full path to docker binary
 	maxJobs    = 5        // Run this many `docker` processes concurrently
 	pollDelay  = 2        // in seconds
 )
