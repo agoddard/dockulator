@@ -85,7 +85,7 @@ func StartJob(calculation calc.Calculation) {
 	if err != nil {
 		log.Printf("Error from docker command: %s\n", err.Error())
 	}
-	log.Printf("Value returned from docker: %v", string(out))
+	log.Printf("Value returned from docker: %s", string(out))
 	// update answer
 	answer, err := strconv.ParseFloat(string(out), 64)
 	if err != nil {
