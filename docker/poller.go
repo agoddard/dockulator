@@ -25,7 +25,7 @@ const (
 var (
 	throttle  = make(chan int, maxJobs)
 	oses      = []string{"2b0268bd2e5b"}
-	languages = []string{"sh"}
+	languages = []string{"rb"}
 	c         = calc.GetCollection()
 	debug bool
 )
