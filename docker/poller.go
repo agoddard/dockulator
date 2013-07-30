@@ -87,7 +87,7 @@ func StartJob(calculation calc.Calculation) {
 	}
 	log.Printf("Value returned from docker: %v", string(out))
 	// update answer
-	answer, err := strconv.Atoi(string(out))
+	answer, err := strconv.ParseFloat(string(out), 64)
 	if err != nil {
 		// send the calculation into the error state here.
 		log.Printf("Could not convert answer to integer: %v", err)
