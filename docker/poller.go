@@ -5,6 +5,7 @@ package main
 // TODO: option for docker args, full command will be `docker run $os /opt/dockulator/calculattors/calc.$language '$calc'
 
 import (
+	"fmt"
 	calc "github.com/ChuckHa/calculations/calculations"
 	"labix.org/v2/mgo/bson"
 	"log"
@@ -87,10 +88,10 @@ func StartJob(calculation calc.Calculation) {
 	}
 	log.Printf("Value returned from docker: %s", string(out))
 	// update answer
-	answer, err := strconv.ParseFloat(string(out), 64)
+	answer, err := strconv.ParseFloat(fmt.Sprintf("%v", string(out)), 64)
 	if err != nil {
 		// send the calculation into the error state here.
-		log.Printf("Could not convert answer to integer: %v", err)
+		log.Printf("Could not convert answer to integer: %v", err.Error())
 		return
 	}
 	calculation.Answer = answer
