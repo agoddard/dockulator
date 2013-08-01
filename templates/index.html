@@ -4,3 +4,19 @@
   <input type="submit" value="calculate" />
 </form>
 {{end}}
+
+{{define "table"}}
+<table class="" description="Some of the most recent calculations performed">
+  <caption>Recent Calculations</caption> 
+  <thead> 
+    <tr> 
+      <th scope="col">Calculation</th> 
+      <th scope="col">Answer</th> 
+      <th scope="col">OS</th> 
+      <th scope="col">Language</th> 
+    </tr> 
+  </thead> 
+  <tbody id="calcbody"> 
+  </tbody> 
+</table> 
+{{end}}

@@ -1,10 +1,10 @@
 package main
 
 import (
+	"code.google.com/p/go.net/websocket"
 	"dockulator/models"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -43,6 +43,7 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 		// Definitely change this
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
+	w.WriteHeader(http.StatusMethodNotAllowed)
 
 	/* don't do this yet
 	var results []models.Calculation
@@ -54,16 +55,14 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 	listTmpl.Execute(w, results)
 	*/
 }
-func calculationsIdHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[lenPath:]
-	calc, err := models.Get(id)
-	if err != nil {
-		log.Println("Error getting a single calculation from mongodb:", err)
-	}
-	detailTmpl.Execute(w, calc)
+
+func websocketHandler(ws *websocket.Conn) {
+	calcs := string(models.GetRecent(3).Json())
+	websocket.JSON.Send(ws, []byte(calcs))
 }
 
 func main() {
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/calculations", calculationsHandler)
 	http.Handle("/websock", websocket.Handler(websocketHandler))
