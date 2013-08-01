@@ -1,4 +1,4 @@
-package calculations
+package models
 
 import (
 	"dockulator/db"
