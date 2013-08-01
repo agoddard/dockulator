@@ -1,31 +1,29 @@
 package main
 
 import (
-	"os"
-	"github.com/ChuckHa/calculations/calculations"
-	"log"
+	"dockulator/models"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
+	"os"
 	"regexp"
 )
 
 const (
-	basePath   = "/calculations/"
-	lenPath	   = len(basePath)
-	collection = "calculations"
+	basePath = "/calculations/"
+	lenPath  = len(basePath)
 )
 
-// Database collection
-var c = calculations.GetSession().DB("").C(collection)
+var (
+	// A valid calculation
+	calcRe = regexp.MustCompile(`^\s*\d+ [\+\-\*\/] \d+\s*$`)
 
-// A valid calculation
-var calcRe = regexp.MustCompile(`^\s*\d+ [\+\-\*\/] \d+\s*$`)
-
-// Templates
-var indexTmpl = template.Must(template.ParseFiles("templates/base.html", "templates/index.html"))
-var listTmpl = template.Must(template.ParseFiles("templates/base.html", "templates/calculations.html"))
-var detailTmpl = template.Must(template.ParseFiles("templates/base.html", "templates/calculation_detail.html"))
+	// Templates
+	indexTmpl  = template.Must(template.ParseFiles("templates/base.html", "templates/index.html"))
+	listTmpl   = template.Must(template.ParseFiles("templates/base.html", "templates/calculations.html"))
+	detailTmpl = template.Must(template.ParseFiles("templates/base.html", "templates/calculation_detail.html"))
+)
 
 // Handlers
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,25 +35,28 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 		calculation := r.FormValue("calculation")
 		found := calcRe.FindString(calculation)
 		if found != "" {
-			// Save the calculation in MongoDB
-			calc := calculations.NewCalculation(calculation)
-			calc.Insert(c)
+			calc := models.NewCalculation(calculation)
+			calc.Insert()
 		} else {
 			http.Error(w, "Invalid calculation", 400)
 		}
+		// Definitely change this
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
-	var results []calculations.Calculation
+
+	/* don't do this yet
+	var results []models.Calculation
 	iter := c.Find(nil).Iter()
 	err := iter.All(&results)
 	if err != nil {
 		log.Println("Error getting calculations from mongodb:", err)
 	}
 	listTmpl.Execute(w, results)
+	*/
 }
 func calculationsIdHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[lenPath:]
-	calc, err := calculations.Get(id, c)
+	calc, err := models.Get(id)
 	if err != nil {
 		log.Println("Error getting a single calculation from mongodb:", err)
 	}
