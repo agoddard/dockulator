@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	port       = "8080"
+	port       = "80"
 	basePath   = "/calculations/"
 	lenPath	   = len(basePath)
 	collection = "calculations"
