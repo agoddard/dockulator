@@ -66,7 +66,7 @@ func calculationsIdHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/calculations", calculationsHandler)
-	http.HandleFunc("/calculations/", calculationsIdHandler)
-	listeningPort := fmt.Sprintf(":%s", os.Getenv("PORT"))
-	http.ListenAndServe(listeningPort, nil)
+	http.Handle("/websock", websocket.Handler(websocketHandler))
+	fmt.Println("Serving on port", os.Getenv("PORT"))
+	http.ListenAndServe(":" + os.Getenv("PORT"), nil)
 }
