@@ -1,1 +1,1 @@
-web: webserver/server_linux
+web: main
