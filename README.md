@@ -89,8 +89,8 @@ In this model, the poller adds the '-d' flag to the docker command, which will d
 
 ## TODO
 
-* Client connects and gets 20 most recent calculations
-* Opens websocket server
+* ~~Client connects and gets 20 most recent calculations~~
+* ~~Opens websocket server~~
 * Client submits calculation
 * Webserver adds calculation to mongo
 * Poller calculations calculation
