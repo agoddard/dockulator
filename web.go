@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"github.com/ChuckHa/calculations/calculations"
 	"log"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 )
 
 const (
-	port       = "80"
 	basePath   = "/calculations/"
 	lenPath	   = len(basePath)
 	collection = "calculations"
@@ -66,6 +66,6 @@ func main() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/calculations", calculationsHandler)
 	http.HandleFunc("/calculations/", calculationsIdHandler)
-	listeningPort := fmt.Sprintf(":%s", port)
+	listeningPort := fmt.Sprintf(":%s", os.Getenv("PORT"))
 	http.ListenAndServe(listeningPort, nil)
 }
