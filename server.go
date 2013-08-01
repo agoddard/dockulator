@@ -14,7 +14,6 @@ const (
 	basePath   = "/calculations/"
 	lenPath	   = len(basePath)
 	collection = "calculations"
-	//logFile    = "/var/log/dockulator/error.log"
 )
 
 // Database collection
@@ -69,5 +68,4 @@ func main() {
 	http.HandleFunc("/calculations/", calculationsIdHandler)
 	listeningPort := fmt.Sprintf(":%s", port)
 	http.ListenAndServe(listeningPort, nil)
-	fmt.Println("Listening on port", port)
 }
