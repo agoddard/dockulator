@@ -2,16 +2,20 @@ package models
 
 import (
 	"dockulator/db"
+	"encoding/json"
 	"labix.org/v2/mgo/bson"
+	"log"
 	"time"
 )
 
 type Calculation struct {
-	Calculation, OS, Language string
-	Id                        bson.ObjectId "_id"
-	Answer                    float64
-	Instance                  string
-	Time                      time.Time
+	Calculation string        `json:"calculation"`
+	OS          string        `json:"os"`
+	Language    string        `json:"language"`
+	Id          bson.ObjectId `json:"-" bson:"_id"`
+	Answer      float64       `json:"answer"`
+	Instance    string        `json:"-"`
+	Time        time.Time     `json:"timestamp"`
 }
 
 func NewCalculation(calculation string) *Calculation {
@@ -53,4 +57,13 @@ func (c *Calculation) Save() (err error) {
 	col := session.DB("").C(db.Collection)
 	col.Update(bson.M{"_id": c.Id}, bson.M{"$set": bson.M{"instance": c.Instance, "answer": c.Answer}})
 	return err
+}
+
+func (c *Calculation) Json() string {
+	json, err := json.Marshal(c)
+	if err != nil {
+		log.Printf("Got an error marshaling calculation: %v", err.Error())
+		return ""
+	}
+	return string(json)
 }
