@@ -5,29 +5,29 @@ package main
 // TODO: option for docker args, full command will be `docker run $os /opt/dockulator/calculattors/calc.$language '$calc'
 
 import (
-	calc "github.com/ChuckHa/calculations/calculations"
+	"dockulator/db"
+	"dockulator/models"
+	"flag"
 	"labix.org/v2/mgo/bson"
 	"log"
 	"math/rand"
 	"os/exec"
 	"strconv"
-	"time"
-	"flag"
 	"strings"
+	"time"
 )
 
 const (
 	dockerPath = "/usr/local/bin/docker"
-	maxJobs    = 5        // Run this many `docker` processes concurrently
-	pollDelay  = 2        // in seconds
+	maxJobs    = 5 // Run this many `docker` processes concurrently
+	pollDelay  = 2 // in seconds
 )
 
 var (
 	throttle  = make(chan int, maxJobs)
 	oses      = []string{"2b0268bd2e5b"}
 	languages = []string{"rb"}
-	c         = calc.GetCollection()
-	debug bool
+	debug     bool
 )
 
 func init() {
@@ -43,14 +43,11 @@ func main() {
 
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	var result []calc.Calculation
-	jobs := make(chan *calc.Calculation)
+	jobs := make(chan *models.Calculation)
 	go ThrottledJobs(jobs)
 
 	for {
-		log.Printf("Polling Mongo")
-		c.Find(bson.M{"instance": ""}).All(&result)
-		log.Printf("Found %d calculations\n", len(result))
+		result := Poll()
 
 		for i := 0; i < len(result); i++ {
 			job := result[i]
@@ -62,11 +59,22 @@ func main() {
 	}
 }
 
+func Poll() (result []models.Calculation) {
+	session := db.GetSession()
+	defer session.Close()
+
+	col := session.DB("").C(db.Collection)
+	log.Printf("Polling Mongo")
+	col.Find(bson.M{"instance": ""}).All(&result)
+	log.Printf("Found %d calculations\n", len(result))
+	return result
+}
+
 func PickString(slice []string) string {
 	return slice[rand.Int()%len(slice)]
 }
 
-func ThrottledJobs(jobs chan *calc.Calculation) {
+func ThrottledJobs(jobs chan *models.Calculation) {
 	for job := range jobs {
 		<-throttle
 		log.Printf("Processing %s using %s on %s\n", job.Calculation, job.Language, job.OS)
@@ -75,8 +83,8 @@ func ThrottledJobs(jobs chan *calc.Calculation) {
 	}
 }
 
-func StartJob(calculation *calc.Calculation) {
-	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc."+calculation.Language,  calculation.Calculation)
+func StartJob(calculation *models.Calculation) {
+	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc."+calculation.Language, calculation.Calculation)
 	if debug {
 		log.Printf("args: %v", strings.Join(cmd.Args, " "))
 		log.Println(cmd)
@@ -96,5 +104,5 @@ func StartJob(calculation *calc.Calculation) {
 	}
 	calculation.Answer = answer
 	calculation.Instance = calculation.OS
-	calculation.Save(c)
+	calculation.Save()
 }
