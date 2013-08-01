@@ -10,12 +10,21 @@ import (
 	"regexp"
 )
 
+func init () {
+	port = os.Getenv("PORT")
+	if port == "" {
+		port = "5000"
+	}
+
+}
+
 const (
 	basePath = "/calculations/"
 	lenPath  = len(basePath)
 )
 
 var (
+	port string
 	// A valid calculation
 	calcRe = regexp.MustCompile(`^\s*\d+ [\+\-\*\/] \d+\s*$`)
 
@@ -42,8 +51,9 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		// Definitely change this
 		http.Redirect(w, r, "/", http.StatusFound)
+	} else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
-	w.WriteHeader(http.StatusMethodNotAllowed)
 
 	/* don't do this yet
 	var results []models.Calculation
@@ -66,6 +76,6 @@ func main() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/calculations", calculationsHandler)
 	http.Handle("/websock", websocket.Handler(websocketHandler))
-	fmt.Println("Serving on port", os.Getenv("PORT"))
-	http.ListenAndServe(":" + os.Getenv("PORT"), nil)
+	fmt.Println("Serving on port", port)
+	http.ListenAndServe(":" + port, nil)
 }
