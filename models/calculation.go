@@ -55,7 +55,12 @@ func (c *Calculation) Save() (err error) {
 	defer session.Close()
 
 	col := session.DB("").C(db.Collection)
-	col.Update(bson.M{"_id": c.Id}, bson.M{"$set": bson.M{"instance": c.Instance, "answer": c.Answer}})
+	col.Update(bson.M{"_id": c.Id}, bson.M{"$set": bson.M{
+		"instance": c.Instance,
+		"answer":   c.Answer,
+		"language": c.Language,
+		"os":       c.OS,
+	}})
 	return err
 }
 
