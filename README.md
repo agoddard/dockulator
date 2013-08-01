@@ -28,7 +28,7 @@ Each calculator must adhere to the same API.
     NUM OP NUM
     NUM = integer
     OP = ["+", "-", "*", "/"]
-    Examples: 1 add 4; 5 div 8; 83242 mul 288338
+    Examples: 1 + 4; 5 / 8; 83242 * 288338
     Writes answer to STDOUT
 
 ## Basic Stack
