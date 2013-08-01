@@ -27,7 +27,7 @@ Each calculator must adhere to the same API.
     Accepts input as arguments to program in the form of
     NUM OP NUM
     NUM = integer
-    OP = ["add", "sub", "mul", "div"]
+    OP = ["+", "-", "*", "/"]
     Examples: 1 add 4; 5 div 8; 83242 mul 288338
     Writes answer to STDOUT
 
@@ -86,3 +86,13 @@ In this model, the poller adds the '-d' flag to the docker command, which will d
 
 ## UI
 
+
+## TODO
+
+* Client connects and gets 20 most recent calculations
+* Opens websocket server
+* Client submits calculation
+* Webserver adds calculation to mongo
+* Poller calculations calculation
+* Poller notifies web server it is done
+* webserver notifies all open websocket clients
