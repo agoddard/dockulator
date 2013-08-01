@@ -52,7 +52,7 @@ func main() {
 		for i := 0; i < len(result); i++ {
 			job := result[i]
 			job.Language = PickString(languages)
-			job.OS = PickString(oses)
+			job.Instance = PickString(oses)
 			jobs <- &job
 		}
 		time.Sleep(pollDelay * time.Second)
@@ -77,14 +77,14 @@ func PickString(slice []string) string {
 func ThrottledJobs(jobs chan *models.Calculation) {
 	for job := range jobs {
 		<-throttle
-		log.Printf("Processing %s using %s on %s\n", job.Calculation, job.Language, job.OS)
+		log.Printf("Processing %s using %s on %s\n", job.Calculation, job.Language, job.Instance)
 		go StartJob(job)
 		throttle <- 1
 	}
 }
 
 func StartJob(calculation *models.Calculation) {
-	cmd := exec.Command(dockerPath, "run", calculation.OS, "/opt/dockulator/calculators/calc."+calculation.Language, calculation.Calculation)
+	cmd := exec.Command(dockerPath, "run", calculation.Instance, "/opt/dockulator/calculators/calc."+calculation.Language, calculation.Calculation)
 	if debug {
 		log.Printf("args: %v", strings.Join(cmd.Args, " "))
 		log.Println(cmd)
@@ -103,6 +103,6 @@ func StartJob(calculation *models.Calculation) {
 		return
 	}
 	calculation.Answer = answer
-	calculation.Instance = calculation.OS
+	calculation.Instance = calculation.Instance
 	calculation.Save()
 }

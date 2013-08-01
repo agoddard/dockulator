@@ -1,4 +1,13 @@
 ;(function (calc) {
+  calc.getDisplayLanguage = function (language) {
+    switch (language) {
+      case 'rb':
+        return 'Ruby';
+      default:
+        return 'Unknown language';
+    }
+  };
+
   calc.render = function (obj) {
     var c = document.createElement('td'),
         ctext = document.createTextNode(obj['calculation']),
@@ -7,7 +16,7 @@
         o = document.createElement('td'),
         otext = document.createTextNode(obj['os']),
         l = document.createElement('td'),
-        ltext = document.createTextNode(obj['language']),
+        ltext = document.createTextNode(calc.getDisplayLanguage(obj['language'])),
         frag = document.createDocumentFragment();
 
     c.appendChild(ctext);
@@ -19,7 +28,7 @@
     frag.appendChild(a);
     frag.appendChild(o);
     frag.appendChild(l);
-    return frag
+    return frag;
   };
 
   calc.insert = function() {
