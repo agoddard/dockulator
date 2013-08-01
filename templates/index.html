@@ -1,0 +1,6 @@
+{{define "content"}}
+<form action="/calculations" method="post">
+  <input type="text" name="calculation" value="" placeholder="Enter a calculation like 1 * 3" pattern="^\s*\d+\s*[\+\-\*\/]\s*\d+\s*$" />
+  <input type="submit" value="calculate" />
+</form>
+{{end}}
