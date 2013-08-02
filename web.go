@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"log"
 	"os"
+	"time"
 )
 
 func init () {
@@ -15,18 +16,34 @@ func init () {
 	if port == "" {
 		port = "5000"
 	}
-
 }
 
 const (
 	basePath = "/calculations/"
 	lenPath  = len(basePath)
+	pruneEvery = 10 // minutes?
 )
 
 type Clients map[string]*websocket.Conn
 
-func (c Clients) SendAll(msg string, data interface{}) {
-	for _, client := range c {
+func (c *Clients) Prune() {
+	fmt.Println("Pruning dead clients")
+	fmt.Println("Number of clients:", len(*c))
+	for k, client := range *c {
+		go func () {
+			err := websocket.Message.Send(client, "ping")
+			//error will be: use of closed network connection
+			if err != nil {
+				delete(*c, k)
+				fmt.Printf("Deleted %v from list of clients.\n", k)
+				fmt.Println(err)
+			}
+		}()
+	}
+}
+
+func (c *Clients) SendAll(msg string, data interface{}) {
+	for _, client := range *c {
 		websocket.JSON.Send(client, BuildMsg(msg, data))
 	}
 }
@@ -68,7 +85,9 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }
 
+// set a read deadline here probably
 func websocketHandler(ws *websocket.Conn) {
+	fmt.Println("Connected client")
 	ip := ws.Request().RemoteAddr
 	_, ok := clients[ip]; if ok {
 		websocket.JSON.Send(ws, BuildMsg("error", "Your IP is already connected"))
@@ -84,11 +103,22 @@ func websocketHandler(ws *websocket.Conn) {
 		if err != nil{
 			break
 		}
+		if msg == "disconnecting" {
+		}
 		fmt.Println("Message Got: ", msg)
 	}
 }
 
 func main() {
+	// Might just be able to get rid of this entirely with ReadWriteDeadline or something?
+	go func () {
+		for {
+			time.Sleep(time.Second)
+			if len(clients) > 0 {
+				clients.Prune()
+			}
+		}
+	}()
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/calculations", calculationsHandler)
