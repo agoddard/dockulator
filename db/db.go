@@ -22,7 +22,6 @@ const (
 )
 
 func GetSession() *mgo.Session {
-	mongoUrl := os.Getenv("MONGO_URL")
 	session, err := mgo.Dial(mongoUrl)
 	if err != nil {
 		panic(err)

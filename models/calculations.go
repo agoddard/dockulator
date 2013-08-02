@@ -1,8 +1,9 @@
 package models
 
 import (
-	"encoding/json"
 	"dockulator/db"
+	"encoding/json"
+	"labix.org/v2/mgo/bson"
 	"log"
 )
 
