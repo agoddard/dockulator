@@ -7,9 +7,9 @@ import (
 )
 
 func init () {
-	mongoUrl = os.Getenv("MONGO_URL")
+	mongoUrl = os.Getenv("MONGOHQ_URL")
 	if mongoUrl == "" {
-		panic(fmt.Errorf("Must supply a MONGO_URL env variable"))
+		panic(fmt.Errorf("Must supply a MONGOHQ_URL env variable"))
 	}
 }
 
