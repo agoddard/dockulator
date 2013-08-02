@@ -162,13 +162,3 @@ func (c *Calculation) Calculate() error {
 	c.Answer = answer
 	return nil
 }
-
-// Return the calculation as a JSON string
-func (c *Calculation) Json() string {
-	json, err := json.Marshal(c)
-	if err != nil {
-		log.Printf("Got an error marshaling calculation: %v", err.Error())
-		return ""
-	}
-	return string(json)
-}

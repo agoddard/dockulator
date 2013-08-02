@@ -1,4 +1,43 @@
-;(function (calc) {
+;(function (websock) {
+  websock.ws = new WebSocket("ws://localhost:5000/websock");
+
+  var initialData = function (data) {
+      calc.insert.apply(null, data);
+  }
+  var error = function (error) {
+    console.log("Got an error from the server:", error);
+  }
+
+  websock.ws.onmessage = function (event) {
+    var obj = JSON.parse(event['data']);
+    switch (obj['type']) {
+      case 'initialData':
+        initialData(obj['data']);
+        break;
+      case 'error':
+        error(obj['data']);
+        break;
+      default:
+        console.log("Got a message, unsure how to proceed")
+        console.log(event);
+        break;
+    }
+  };
+
+  websock.ws.onopen = function () {};
+
+  websock.ws.onclose = function () {};
+
+  websock.ws.onerror = function () {};
+
+  websock.ws.sendmsg = function (message) {
+    websock.ws.send(message);
+  };
+
+
+}(window.websock = window.websock || {}));
+
+;(function (calc, $) {
   calc.getDisplayLanguage = function (language) {
     switch (language) {
       case 'rb':
@@ -45,9 +84,7 @@
       frag.appendChild(el);
     }
     tableEl.appendChild(frag);
-  }
-
-}(window.calc = window.calc || {}));
+  };
 
   calc.getCalculation = function () {
     var calcInputId = '#input-calculation';
