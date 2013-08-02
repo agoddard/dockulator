@@ -42,28 +42,18 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		calculation := r.FormValue("calculation")
-		found := calcRe.FindString(calculation)
-		if found != "" {
-			calc := models.NewCalculation(calculation)
+		found := models.CleanCalculation(calculation)
+		if found != "error" {
+			calc := models.NewCalculation(found)
 			calc.Insert()
-		} else {
-			http.Error(w, "Invalid calculation", 400)
+			w.WriteHeader(http.StatusCreated)
+			return
 		}
-		// Definitely change this
-		http.Redirect(w, r, "/", http.StatusFound)
-	} else {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		log.Printf("Got weird input: %v", calculation)
+		http.Error(w, "Invalid calculation", 400)
+		return
 	}
-
-	/* don't do this yet
-	var results []models.Calculation
-	iter := c.Find(nil).Iter()
-	err := iter.All(&results)
-	if err != nil {
-		log.Println("Error getting calculations from mongodb:", err)
-	}
-	listTmpl.Execute(w, results)
-	*/
+	http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }
 
 func websocketHandler(ws *websocket.Conn) {

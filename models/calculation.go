@@ -2,19 +2,24 @@ package models
 
 import (
 	"dockulator/db"
-	"encoding/json"
 	"labix.org/v2/mgo/bson"
-	"log"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+	"bytes"
+	"regexp"
 )
 
 const (
 	dockerPath   = "/usr/local/bin/docker"
 	calcPath     = "/opt/dockulator/calculators/"
 	osScriptPath = "TODO: JEROME FIXME!!!"
+	calcRe = `\d+(\.\d+)? [\+\-\/\*] \d+(\.\d+)?`
+)
+
+var (
+	calculationRe = regexp.MustCompile(calcRe)
 )
 
 type Calculation struct {
@@ -38,6 +43,51 @@ func NewCalculation(calculation string) *Calculation {
 		Id:          bson.NewObjectId(),
 		Time:        bson.Now(),
 	}
+}
+
+func CleanCalculation(calc string) string {
+	noSpaces := bytes.TrimSpace([]byte(calc))
+	var clean bytes.Buffer
+	needLeft := true
+	needRight := false
+	needDecimal := true
+	for _, c := range noSpaces {
+		if needLeft {
+			if needDecimal {
+				if c == '.' {
+					clean.WriteByte(c)
+					needDecimal = false
+				}
+			}
+			// If c is a digit or a decmial keep save it and keep going
+			if c >= '0' && c <= '9' {
+				clean.WriteByte(c)
+			} else if (c == '+' || c == '-' || c == '*' || c == '/') {
+				clean.WriteRune(' ')
+				clean.WriteByte(c)
+				clean.WriteRune(' ')
+				needLeft = false
+				needRight = true
+				needDecimal = true
+			}
+		}
+
+		if needRight {
+			if needDecimal {
+				if c == '.' {
+					clean.WriteByte(c)
+					needDecimal = false
+				}
+			}
+			if c >= '0' && c <= '9' {
+				clean.WriteByte(c)
+			}
+		}
+	}
+	if calculationRe.Match(clean.Bytes()) {
+		return clean.String()
+	}
+	return "error"
 }
 
 // Get a calculation from mongo by _id
