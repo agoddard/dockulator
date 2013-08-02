@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"labix.org/v2/mgo/bson"
 	"log"
-	"time"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
-	dockerPath = "/usr/local/bin/docker"
-	calcPath = "/opt/dockulator/calculators/"
+	dockerPath   = "/usr/local/bin/docker"
+	calcPath     = "/opt/dockulator/calculators/"
 	osScriptPath = "TODO: JEROME FIXME!!!"
 )
 
@@ -86,7 +86,7 @@ func (c *Calculation) GetOS() error {
 	// example command: `docker run 12345 getos.sh`
 	cmd := exec.Command(dockerPath, "run", c.Instance, osScriptPath)
 	out, err := cmd.Output()
-	if err !- nil {
+	if err != nil {
 		return err
 	}
 	os := strings.TrimSpace(string(out))
@@ -101,13 +101,13 @@ func (c *Calculation) Calculate() error {
 	out, err := cmd.Output()
 	if err != nil {
 		// TODO: just run the calculation in go
-		return error
+		return err
 	}
 	floatVal := strings.TrimSpace(string(out))
 	answer, err := strconv.ParseFloat(string(floatVal), 64)
 	if err != nil {
 		// Something definitely went bad.
-		return error
+		return err
 	}
 	c.Answer = answer
 	return nil
