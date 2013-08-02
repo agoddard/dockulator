@@ -49,20 +49,26 @@
 
 }(window.calc = window.calc || {}));
 
-;(function () {
-  var ws = new WebSocket("ws://localhost:5000/websock");
-
-  var cleanInput = function (data) {
-    return data.substr(1, data.length-2);
-  }
-
-  var getJson = function (data) {
-    return JSON.parse(atob(cleanInput(data)));
-  }
-
-  ws.onmessage = function (event) {
-    var data = getJson(event.data);
-    calc.insert.apply(null, data);
+  calc.getCalculation = function () {
+    var calcInputId = '#input-calculation';
+    input = $(calcInputId).val();
+    return input;
   };
 
-}());
+  var calcFormId = '#new-calculation';
+
+  $('#new-calculation').on('submit', function (event) {
+    $.ajax({
+      type: 'POST',
+      url: '/calculations',
+      data: {
+        'calculation': calc.getCalculation()
+      }
+    }).done(function (data) {
+      console.log(data);
+    });
+    return false;
+  });
+
+}(window.calc = window.calc || {}, jQuery));
+
