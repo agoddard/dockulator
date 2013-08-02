@@ -15,7 +15,7 @@ const (
 	dockerPath   = "/usr/local/bin/docker"
 	calcPath     = "/opt/dockulator/calculators/"
 	osScriptPath = "TODO: JEROME FIXME!!!"
-	calcRe = `\d+(\.\d+)? [\+\-\/\*] \d+(\.\d+)?`
+	calcRe = `(-)?\d+(\.\d+)? [\+\-\/\*] (-)?\d+(\.\d+)?`
 )
 
 var (
@@ -45,45 +45,73 @@ func NewCalculation(calculation string) *Calculation {
 	}
 }
 
+// Holy fuck. What the fuck happened. I blacked out.
 func CleanCalculation(calc string) string {
 	noSpaces := bytes.TrimSpace([]byte(calc))
 	var clean bytes.Buffer
-	needLeft := true
-	needRight := false
+	foundOp := false
 	needDecimal := true
+	needNeg := true
 	for _, c := range noSpaces {
-		if needLeft {
-			if needDecimal {
-				if c == '.' {
+		// We start without having found the operator
+		if !foundOp {
+			// We start with needing a negative
+			if needNeg {
+				if c == '-' {
 					clean.WriteByte(c)
-					needDecimal = false
+					// Now we don't need another negative
+					needNeg = false
+					continue
 				}
 			}
-			// If c is a digit or a decmial keep save it and keep going
-			if c >= '0' && c <= '9' {
-				clean.WriteByte(c)
-			} else if (c == '+' || c == '-' || c == '*' || c == '/') {
-				clean.WriteRune(' ')
-				clean.WriteByte(c)
-				clean.WriteRune(' ')
-				needLeft = false
-				needRight = true
-				needDecimal = true
-			}
-		}
 
-		if needRight {
+			if needDecimal {
+				if c == '.' {
+					clean.WriteByte(c)
+					// We don't need another decimal
+					needDecimal = false
+					// If we got a decimal we don't need a negative
+					needNeg = false
+				}
+			}
+
+			// We always like numbers
+			if c >= '0' && c <= '9' {
+				clean.WriteByte(c)
+				needNeg = false
+			}
+			// If we come across an operator, we use it and go to the next thing
+			if (c == '+' || c == '-' || c == '*' || c == '/') {
+				clean.WriteRune(' ')
+				clean.WriteByte(c)
+				clean.WriteRune(' ')
+				foundOp = true
+				needDecimal = true
+				needNeg = true
+			}
+		} else {
+			if needNeg {
+				if c == '-' {
+					clean.WriteByte(c)
+					needNeg = false
+				}
+			}
+
 			if needDecimal {
 				if c == '.' {
 					clean.WriteByte(c)
 					needDecimal = false
+					needNeg = false
 				}
 			}
 			if c >= '0' && c <= '9' {
 				clean.WriteByte(c)
+				needNeg = false
 			}
 		}
 	}
+	// after we have parsed out the garbage, we just do a quick regexp
+	// to make sure we are sane.
 	if calculationRe.Match(clean.Bytes()) {
 		return clean.String()
 	}

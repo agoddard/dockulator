@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go.net/websocket"
 	"dockulator/models"
 	"fmt"
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"log"
@@ -75,7 +76,10 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 		if found != "error" {
 			calc := models.NewCalculation(found)
 			calc.Insert()
+			w.Header().Add("Content-type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusCreated)
+			b, _ := json.Marshal(calc)
+			w.Write(b)
 			return
 		}
 		log.Printf("Got weird input: %v", calculation)
@@ -113,7 +117,7 @@ func main() {
 	// Might just be able to get rid of this entirely with ReadWriteDeadline or something?
 	go func () {
 		for {
-			time.Sleep(time.Second)
+			time.Sleep(pruneEvery * time.Second)
 			if len(clients) > 0 {
 				clients.Prune()
 			}
