@@ -30,3 +30,12 @@ func (c Calculations) Json() []byte {
 	}
 	return b
 }
+
+func UnsolvedCalculations() (result Calculations) {
+	session := db.GetSession()
+	defer session.Close()
+
+	col := session.DB("").C(db.Collection)
+	col.Find(bson.M{"instance": ""}).All(&result)
+	return result
+}
