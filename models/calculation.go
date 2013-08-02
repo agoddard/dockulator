@@ -6,6 +6,15 @@ import (
 	"labix.org/v2/mgo/bson"
 	"log"
 	"time"
+	"os/exec"
+	"strconv"
+	"strings"
+)
+
+const (
+	dockerPath = "/usr/local/bin/docker"
+	calcPath = "/opt/dockulator/calculators/"
+	osScriptPath = "TODO: JEROME FIXME!!!"
 )
 
 type Calculation struct {
@@ -18,6 +27,7 @@ type Calculation struct {
 	Time        time.Time     `json:"timestamp"`
 }
 
+// Return an empty calculation
 func NewCalculation(calculation string) *Calculation {
 	return &Calculation{
 		Calculation: calculation,
@@ -30,6 +40,7 @@ func NewCalculation(calculation string) *Calculation {
 	}
 }
 
+// Get a calculation from mongo by _id
 func Get(id string) (c *Calculation, err error) {
 	session := db.GetSession()
 	defer session.Close()
@@ -40,6 +51,7 @@ func Get(id string) (c *Calculation, err error) {
 	return c, err
 }
 
+// Insert a calculation to mongo
 func (c *Calculation) Insert() (err error) {
 	session := db.GetSession()
 	defer session.Close()
@@ -50,6 +62,7 @@ func (c *Calculation) Insert() (err error) {
 	return err
 }
 
+// Update the calculation in Mongo
 func (c *Calculation) Save() (err error) {
 	session := db.GetSession()
 	defer session.Close()
@@ -64,6 +77,43 @@ func (c *Calculation) Save() (err error) {
 	return err
 }
 
+func (c *Calculation) calculator() string {
+	return calcPath + "calc." + c.Language
+}
+
+// GetOS will set the OS attribute of the calculation
+func (c *Calculation) GetOS() error {
+	// example command: `docker run 12345 getos.sh`
+	cmd := exec.Command(dockerPath, "run", c.Instance, osScriptPath)
+	out, err := cmd.Output()
+	if err !- nil {
+		return err
+	}
+	os := strings.TrimSpace(string(out))
+	c.OS = os
+	return nil
+}
+
+// Calculate will set the Answer attribute of the calculation
+func (c *Calculation) Calculate() error {
+	// example command: `docker run 12345 calc.rb 4 + 2`
+	cmd := exec.Command(dockerPath, "run", c.Instance, c.calculator(), c.Calculation)
+	out, err := cmd.Output()
+	if err != nil {
+		// TODO: just run the calculation in go
+		return error
+	}
+	floatVal := strings.TrimSpace(string(out))
+	answer, err := strconv.ParseFloat(string(floatVal), 64)
+	if err != nil {
+		// Something definitely went bad.
+		return error
+	}
+	c.Answer = answer
+	return nil
+}
+
+// Return the calculation as a JSON string
 func (c *Calculation) Json() string {
 	json, err := json.Marshal(c)
 	if err != nil {
