@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"log"
 	"os"
-	"regexp"
 )
 
 func init () {
@@ -23,17 +23,29 @@ const (
 	lenPath  = len(basePath)
 )
 
+type Clients map[string]*websocket.Conn
+
+func (c Clients) SendAll(msg string, data interface{}) {
+	for _, client := range c {
+		websocket.JSON.Send(client, BuildMsg(msg, data))
+	}
+}
+
+func BuildMsg(msg string, data interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"type": msg,
+		"data": data,
+	}
+}
+
 var (
 	port string
-	// A valid calculation
-	calcRe = regexp.MustCompile(`^\s*\d+ [\+\-\*\/] \d+\s*$`)
-
 	// Templates
 	indexTmpl  = template.Must(template.ParseFiles("templates/base.html", "templates/index.html"))
 	listTmpl   = template.Must(template.ParseFiles("templates/base.html", "templates/calculations.html"))
 	detailTmpl = template.Must(template.ParseFiles("templates/base.html", "templates/calculation_detail.html"))
+	clients = make(Clients)
 )
-
 // Handlers
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	indexTmpl.Execute(w, nil)
@@ -57,8 +69,23 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func websocketHandler(ws *websocket.Conn) {
-	calcs := string(models.GetRecent(3).Json())
-	websocket.JSON.Send(ws, []byte(calcs))
+	ip := ws.Request().RemoteAddr
+	_, ok := clients[ip]; if ok {
+		websocket.JSON.Send(ws, BuildMsg("error", "Your IP is already connected"))
+		ws.Close()
+		return
+	}
+	clients[ip] = ws
+	calcs := models.GetRecent(3)
+	websocket.JSON.Send(ws, BuildMsg("initialData", calcs))
+	for {
+		var msg string
+		err := websocket.Message.Receive(ws, &msg)
+		if err != nil{
+			break
+		}
+		fmt.Println("Message Got: ", msg)
+	}
 }
 
 func main() {
