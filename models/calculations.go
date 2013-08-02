@@ -2,7 +2,6 @@ package models
 
 import (
 	"dockulator/db"
-	"encoding/json"
 	"labix.org/v2/mgo/bson"
 	"log"
 )
@@ -21,15 +20,6 @@ func GetRecent(n int) Calculations {
 		log.Printf("Got an error finding recent calculations: %v", err.Error())
 	}
 	return result
-}
-
-func (c Calculations) Json() []byte {
-	b, err := json.Marshal(c)
-	if err != nil {
-		log.Printf("Error marshalling calcs: %v", err)
-		return []byte{}
-	}
-	return b
 }
 
 func UnsolvedCalculations() (result Calculations) {
