@@ -9,6 +9,9 @@
   }
 
   websock.ws.onmessage = function (event) {
+    if (event.data == 'ping') {
+      return;
+    }
     var obj = JSON.parse(event['data']);
     switch (obj['type']) {
       case 'initialData':
@@ -26,14 +29,15 @@
 
   websock.ws.onopen = function () {};
 
-  websock.ws.onclose = function () {};
+  websock.ws.onclose = function () {
+    // This is when the server closes the connection
+  };
 
   websock.ws.onerror = function () {};
 
   websock.ws.sendmsg = function (message) {
     websock.ws.send(message);
   };
-
 
 }(window.websock = window.websock || {}));
 
