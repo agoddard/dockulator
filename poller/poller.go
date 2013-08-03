@@ -4,6 +4,8 @@ import (
 	"dockulator/models"
 	"math/rand"
 	"time"
+	"flag"
+	"log"
 )
 
 const (
@@ -15,6 +17,7 @@ var (
 	throttle  = make(chan int, maxJobs)
 	oses      = []string{"2b0268bd2e5b"}
 	languages = []string{"rb"}
+	debug bool
 )
 
 func init() {
@@ -22,9 +25,11 @@ func init() {
 	for i := 0; i < maxJobs; i++ {
 		throttle <- 1
 	}
+	flag.BoolVar(&debug, "debug", false, "set --debug to debug the docker output")
 }
 
 func main() {
+	flag.Parse()
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	jobs := make(chan *models.Calculation)
@@ -32,6 +37,9 @@ func main() {
 
 	for {
 		result := poll()
+		if debug {
+			log.Printf("Poll returned %d results\n", len(result))
+		}
 
 		for i := 0; i < len(result); i++ {
 			calculation := result[i]
@@ -62,7 +70,13 @@ func processJobs(calculations chan *models.Calculation) {
 
 func startJob(calculation *models.Calculation) {
 	calculation.Calculate()
+	if debug {
+		log.Printf("Calculation: %s", calculation.Answer)
+	}
 	calculation.GetOS()
+	if debug {
+		log.Printf("OS hint: %s", calculation.OS)
+	}
 	calculation.Save()
 }
 
