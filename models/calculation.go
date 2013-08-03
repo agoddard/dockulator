@@ -9,6 +9,7 @@ import (
 	"time"
 	"bytes"
 	"regexp"
+	"encoding/json"
 )
 
 const (
@@ -42,6 +43,15 @@ func NewCalculation(calculation string) *Calculation {
 		Instance:    "",
 		Id:          bson.NewObjectId(),
 		Time:        bson.Now(),
+	}
+}
+
+func GetLanguage(lang string) string {
+	switch lang {
+	case "rb":
+		return "Ruby"
+	default:
+		return "Unknown Language"
 	}
 }
 
@@ -189,4 +199,10 @@ func (c *Calculation) Calculate() error {
 	}
 	c.Answer = answer
 	return nil
+}
+
+// Don't want to modify the actual object
+func (c Calculation) AsJson() ([]byte, error) {
+	c.Language = GetLanguage(c.Language)
+	return json.Marshal(c)
 }
