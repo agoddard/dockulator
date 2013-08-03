@@ -38,7 +38,7 @@ func main() {
 	for {
 		result := poll()
 		if debug {
-			log.Printf("Poll returned %d results\n", len(result))
+			log.Printf("Poll returned %v results\n", len(result))
 		}
 
 		for i := 0; i < len(result); i++ {
@@ -71,11 +71,11 @@ func processJobs(calculations chan *models.Calculation) {
 func startJob(calculation *models.Calculation) {
 	calculation.Calculate()
 	if debug {
-		log.Printf("Calculation: %s\n", calculation.Answer)
+		log.Printf("Calculation: %v\n", calculation.Answer)
 	}
 	calculation.GetOS()
 	if debug {
-		log.Printf("OS hint: %s\n", calculation.OS)
+		log.Printf("OS hint: %v\n", calculation.OS)
 	}
 	calculation.Save()
 }
