@@ -4,7 +4,6 @@ import (
 	"code.google.com/p/go.net/websocket"
 	"dockulator/models"
 	"fmt"
-	"encoding/json"
 	"html/template"
 	"net/http"
 	"log"
@@ -24,6 +23,7 @@ const (
 	lenPath  = len(basePath)
 	pruneEvery = 10 // minutes?
 )
+
 
 type Clients map[string]*websocket.Conn
 
@@ -58,15 +58,18 @@ func BuildMsg(msg string, data interface{}) map[string]interface{} {
 
 var (
 	port string
+	funcMap = template.FuncMap{
+		"lang": models.GetLanguage,
+	}
 	// Templates
-	indexTmpl  = template.Must(template.ParseFiles("templates/base.html", "templates/index.html"))
-	listTmpl   = template.Must(template.ParseFiles("templates/base.html", "templates/calculations.html"))
-	detailTmpl = template.Must(template.ParseFiles("templates/base.html", "templates/calculation_detail.html"))
+	baseTmpl = template.Must(template.ParseFiles("templates/base.html")).Funcs(funcMap)
+	indexTmpl = template.Must(baseTmpl.ParseFiles("templates/index.html"))
 	clients = make(Clients)
 )
 // Handlers
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	indexTmpl.Execute(w, nil)
+	calcs := models.GetRecent(20)
+	indexTmpl.Execute(w, calcs)
 }
 
 func calculationsHandler(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +81,10 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 			calc.Insert()
 			w.Header().Add("Content-type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusCreated)
-			b, _ := json.Marshal(calc)
+			b, err := calc.AsJson()
+			if err != nil {
+				log.Printf("Error marshalling calc as JSON: %v", err.Error())
+			}
 			w.Write(b)
 			return
 		}
@@ -99,8 +105,6 @@ func websocketHandler(ws *websocket.Conn) {
 		return
 	}
 	clients[ip] = ws
-	calcs := models.GetRecent(3)
-	websocket.JSON.Send(ws, BuildMsg("initialData", calcs))
 	for {
 		var msg string
 		err := websocket.Message.Receive(ws, &msg)
