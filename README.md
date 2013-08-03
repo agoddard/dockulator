@@ -1,7 +1,7 @@
 dockulator
 ==========
 
-dockulator
+A slightly over the top calculator that uses Docker to run your calculation on a random OS + language combination.
 
 ## Compiling
 
@@ -91,8 +91,8 @@ In this model, the poller adds the '-d' flag to the docker command, which will d
 
 * ~~Client connects and gets 20 most recent calculations~~
 * ~~Opens websocket server~~
-* Client submits calculation
-* Webserver adds calculation to mongo
-* Poller calculations calculation
+* ~~Client submits calculation~~
+* ~~Webserver adds calculation to mongo~~
+* ~~Poller calculations calculation~~
 * Poller notifies web server it is done
 * webserver notifies all open websocket clients
