@@ -17,6 +17,14 @@
     </tr> 
   </thead> 
   <tbody id="calcbody"> 
+    {{range .}}
+    <tr>
+      <td>{{.Calculation}}</td>
+      <td>{{.Answer}}</td>
+      <td>{{.OS}}</td>
+      <td>{{lang .Language }}</td>
+    </tr>
+    {{end}}
   </tbody> 
 </table> 
 {{end}}
