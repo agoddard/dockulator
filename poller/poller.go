@@ -71,11 +71,11 @@ func processJobs(calculations chan *models.Calculation) {
 func startJob(calculation *models.Calculation) {
 	calculation.Calculate()
 	if debug {
-		log.Printf("Calculation: %s", calculation.Answer)
+		log.Printf("Calculation: %s\n", calculation.Answer)
 	}
 	calculation.GetOS()
 	if debug {
-		log.Printf("OS hint: %s", calculation.OS)
+		log.Printf("OS hint: %s\n", calculation.OS)
 	}
 	calculation.Save()
 }
