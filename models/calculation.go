@@ -15,7 +15,7 @@ import (
 const (
 	dockerPath   = "/usr/local/bin/docker"
 	calcPath     = "/opt/dockulator/calculators/"
-	osScriptPath = "TODO: JEROME FIXME!!!"
+	osScriptCmd = "/bin/cat /etc/issue | head -n 1"
 	calcRe = `(-)?\d+(\.\d+)? [\+\-\/\*] (-)?\d+(\.\d+)?`
 )
 
@@ -172,7 +172,7 @@ func (c *Calculation) calculator() string {
 // GetOS will set the OS attribute of the calculation
 func (c *Calculation) GetOS() error {
 	// example command: `docker run 12345 getos.sh`
-	cmd := exec.Command(dockerPath, "run", c.Instance, osScriptPath)
+	cmd := exec.Command(dockerPath, "run", c.Instance, osScriptCmd)
 	out, err := cmd.Output()
 	if err != nil {
 		return err
