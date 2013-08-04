@@ -180,11 +180,10 @@ func (c *Calculation) GetOS() error {
 	out, err := cmd.Output()
 	if err != nil {
 		c.Error = err.Error()
-		return err
 	}
 	os := strings.TrimSpace(string(out))
 	c.OS = os
-	return nil
+	return err
 }
 
 // Calculate will set the Answer attribute of the calculation
@@ -195,17 +194,15 @@ func (c *Calculation) Calculate() error {
 	if err != nil {
 		c.Error = err.Error()
 		// TODO: just run the calculation in go
-		return err
 	}
 	floatVal := strings.TrimSpace(string(out))
 	answer, err := strconv.ParseFloat(string(floatVal), 64)
 	if err != nil {
 		c.Error = err.Error()
 		// Something definitely went bad.
-		return err
 	}
 	c.Answer = answer
-	return nil
+	return err
 }
 
 func (c *Calculation) String() string {
