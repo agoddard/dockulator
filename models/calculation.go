@@ -1,22 +1,23 @@
 package models
 
 import (
+	"fmt"
+	"bytes"
 	"dockulator/db"
+	"encoding/json"
 	"labix.org/v2/mgo/bson"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"bytes"
-	"regexp"
-	"encoding/json"
 )
 
 const (
-	dockerPath   = "/usr/local/bin/docker"
-	calcPath     = "/opt/dockulator/calculators/"
+	dockerPath  = "/usr/local/bin/docker"
+	calcPath    = "/opt/dockulator/calculators/"
 	osScriptCmd = "/bin/cat /etc/issue | head -n 1"
-	calcRe = `(-)?\d+(\.\d+)? [\+\-\/\*] (-)?\d+(\.\d+)?`
+	calcRe      = `(-)?\d+(\.\d+)? [\+\-\/\*] (-)?\d+(\.\d+)?`
 )
 
 var (
@@ -27,10 +28,11 @@ type Calculation struct {
 	Calculation string        `json:"calculation"`
 	OS          string        `json:"os"`
 	Language    string        `json:"language"`
-	Id          bson.ObjectId `json:"-" bson:"_id"`
+	Id          bson.ObjectId `json:"id" bson:"_id"`
 	Answer      float64       `json:"answer"`
 	Instance    string        `json:"-"`
 	Time        time.Time     `json:"timestamp"`
+	Error       string        `json:"-"`
 }
 
 // Return an empty calculation
@@ -43,6 +45,7 @@ func NewCalculation(calculation string) *Calculation {
 		Instance:    "",
 		Id:          bson.NewObjectId(),
 		Time:        bson.Now(),
+		Error:       "",
 	}
 }
 
@@ -91,7 +94,7 @@ func CleanCalculation(calc string) string {
 				needNeg = false
 			}
 			// If we come across an operator, we use it and go to the next thing
-			if (c == '+' || c == '-' || c == '*' || c == '/') {
+			if c == '+' || c == '-' || c == '*' || c == '/' {
 				clean.WriteRune(' ')
 				clean.WriteByte(c)
 				clean.WriteRune(' ')
@@ -161,6 +164,7 @@ func (c *Calculation) Save() (err error) {
 		"answer":   c.Answer,
 		"language": c.Language,
 		"os":       c.OS,
+		"error":    c.Error,
 	}})
 	return err
 }
@@ -175,6 +179,7 @@ func (c *Calculation) GetOS() error {
 	cmd := exec.Command(dockerPath, "run", c.Instance, osScriptCmd)
 	out, err := cmd.Output()
 	if err != nil {
+		c.Error = err.Error()
 		return err
 	}
 	os := strings.TrimSpace(string(out))
@@ -188,17 +193,23 @@ func (c *Calculation) Calculate() error {
 	cmd := exec.Command(dockerPath, "run", c.Instance, c.calculator(), c.Calculation)
 	out, err := cmd.Output()
 	if err != nil {
+		c.Error = err.Error()
 		// TODO: just run the calculation in go
 		return err
 	}
 	floatVal := strings.TrimSpace(string(out))
 	answer, err := strconv.ParseFloat(string(floatVal), 64)
 	if err != nil {
+		c.Error = err.Error()
 		// Something definitely went bad.
 		return err
 	}
 	c.Answer = answer
 	return nil
+}
+
+func (c *Calculation) String() string {
+	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\n", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error)
 }
 
 // Don't want to modify the actual object
