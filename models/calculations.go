@@ -30,6 +30,6 @@ func UnsolvedCalculations() (result Calculations) {
 	defer session.Close()
 
 	col := session.DB("").C(db.Collection)
-	col.Find(bson.M{"instance": "", "error": nil}).All(&result)
+	col.Find(bson.M{"instance": ""}).All(&result)
 	return result
 }
