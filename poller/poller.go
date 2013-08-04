@@ -15,7 +15,7 @@ const (
 
 var (
 	throttle  = make(chan int, maxJobs)
-	oses      = []string{"2b0268bd2e5b"}
+	oses      = []string{"2b0268bd2e5b","035b5d4ff9f4"}
 	languages = []string{"rb"}
 	debug bool
 )
