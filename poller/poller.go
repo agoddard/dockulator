@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+	"net/url"
 	"dockulator/models"
 	"math/rand"
 	"time"
@@ -11,6 +13,7 @@ import (
 const (
 	maxJobs    = 5 // Run this many `docker` processes concurrently
 	pollDelay  = 2 // in seconds
+	serverUrl = "http://localhost:5000/poller"
 )
 
 var (
@@ -68,15 +71,32 @@ func processJobs(calculations chan *models.Calculation) {
 	}
 }
 
+func notifyServer(id string) {
+	if debug {
+		log.Printf("Notifying server that %v is finished\n", id)
+	}
+	_, err := http.PostForm(serverUrl, url.Values{"calculationId": {id}});
+	if err != nil {
+		log.Printf("Error notifying the server: %v\n", err.Error())
+	}
+}
+
 func startJob(calculation *models.Calculation) {
-	calculation.Calculate()
+	err := calculation.Calculate()
 	if debug {
 		log.Printf("Calculation: %v\n", calculation.Answer)
 	}
-	calculation.GetOS()
+	if err != nil {
+		log.Printf("Got an error while claculating: %v", err.Error())
+	}
+	err = calculation.GetOS()
 	if debug {
 		log.Printf("OS hint: %v\n", calculation.OS)
 	}
+	if err != nil {
+		log.Printf("Got an error getting calculation's OS: %v", err.Error())
+	}
 	calculation.Save()
+	notifyServer(calculation.Id.Hex())
 }
 

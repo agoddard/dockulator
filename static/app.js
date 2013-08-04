@@ -1,21 +1,37 @@
 ;(function (websock) {
   websock.ws = new WebSocket("ws://localhost:5000/websock");
 
-  var initialData = function (data) {
-      calc.insert.apply(null, data);
-  }
+  var updateCalculation = function (data) {
+    var el = $('#id-' + data['id']);
+    if (el.length == 0) {
+      addCalculation(data);
+      return
+    }
+    el.parentNode.removeChild(el);
+    addCalculation(data);
+  };
+  var addCalculations = function (data) {
+    calc.insert.apply(null, data);
+  };
+  var addCalculation = function (data) {
+    calc.insert.apply(null, [data]);
+  };
   var error = function (error) {
     console.log("Got an error from the server:", error);
-  }
+  };
 
   websock.ws.onmessage = function (event) {
     if (event.data == 'ping') {
       return;
     }
+    console.log(event.data);
     var obj = JSON.parse(event['data']);
     switch (obj['type']) {
-      case 'initialData':
-        initialData(obj['data']);
+      case 'new':
+        addCalculation(obj['data']);
+        break;
+      case 'update':
+        updateCalculation(obj['data']);
         break;
       case 'error':
         error(obj['data']);
@@ -78,16 +94,20 @@
     var i = 0, 
         len = arguments.length,
         tableEl = document.getElementById("calcbody"),
-        frag = document.createDocumentFragment();
+        frag = document.createDocumentFragment(),
+        obj, el, tmpl;
 
     for (;i < arguments.length; i++) {
-      var el = document.createElement('tr');
-      el.className = "calculation"
-      var tmpl = calc.render(arguments[i]);
+      obj = arguments[i];
+      el = document.createElement('tr');
+      el.className = 'calculation';
+      el.id = obj['id'];
+      console.log(el);
+      tmpl = calc.render(obj);
       el.appendChild(tmpl);
       frag.appendChild(el);
     }
-    tableEl.appendChild(frag);
+    tableEl.insertBefore(frag, tableEl.firstChild);
   };
 
   calc.getCalculation = function () {
