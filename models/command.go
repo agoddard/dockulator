@@ -1,10 +1,10 @@
 package models
 
 import (
-	"fmt"
 	"os/exec"
 	"bytes"
 )
+
 // A Cleaner is a function that manipulates bytes.
 // It is used to clean up output from Docker.
 type Cleaner func([]byte) []byte
@@ -41,8 +41,8 @@ func (c *Command) RegisterCleaner(cleaner func([]byte) []byte) {
 // Cleanup function for docker. Might get better with -cidfile.
 func CleanUp() error {
 	// Get a list of running processes
-	cmd = NewCommand("docker", "ps", "-a", "-q")
-	out, err = cmd.Output()
+	cmd := NewCommand("docker", "ps", "-a", "-q")
+	out, err := cmd.Output()
 	if err != nil {
 		return err
 	}
@@ -67,6 +67,7 @@ func FirstLine(in []byte) []byte {
 	return bytes.Split(in, []byte("\n"))[0]
 }
 
+/* Example usage:
 func main() {
 	cmd := NewCommand("docker", "run", "7662e12d0778", "/dockulator/calculators/calc.rb", "23 + 44")
 	out, _ := cmd.Output()
@@ -77,5 +78,5 @@ func main() {
 	out, _ = cmd.Output()
 	fmt.Println("OS:", string(out))
 }
-
+*/
 

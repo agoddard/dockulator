@@ -8,6 +8,7 @@ import (
 	"time"
 	"flag"
 	"log"
+	"bytes"
 )
 
 const (
@@ -82,9 +83,8 @@ func notifyServer(id string) {
 }
 
 func startJob(calculation *models.Calculation) {
-	err := calculation.Calculate()
+	err := calculation.GetCalc()
 	if debug {
-		log.Printf("Calc command: %v\n", calculation.CalcCmd().Args)
 		log.Printf("Calculation: %v\n", calculation.Answer)
 	}
 	if err != nil {
@@ -92,13 +92,39 @@ func startJob(calculation *models.Calculation) {
 	}
 	err = calculation.GetOS()
 	if debug {
-		log.Printf("OS command: %v\n", calculation.OSCmd().Args)
 		log.Printf("OS hint: %v\n", calculation.OS)
 	}
 	if err != nil {
 		log.Printf("Got an error getting calculation's OS: %v", err.Error())
 	}
 	calculation.Save()
+	err = CleanUp()
+	if err != nil {
+		log.Printf("Got an error cleaning up docker containers: %v", err.Error())
+	}
 	notifyServer(calculation.Id.Hex())
 }
 
+// Cleanup function for docker. Might get better with -cidfile.
+func CleanUp() error {
+	// Get a list of running processes
+	cmd := models.NewCommand("docker", "ps", "-a", "-q")
+	out, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+	lines := bytes.Split(out, []byte("\n"))
+	instances := make([]string, len(lines) + 1)
+	// Hack because sometimes go's type system is less flexible than it seems
+	instances[0] = "rm"
+	for i, line := range lines {
+		instances[i + 1] = string(line)
+	}
+	// This removes all running processes
+	cmd = models.NewCommand("docker", instances...)
+	out, err = cmd.Output()
+	if err != nil {
+		return err
+	}
+	return nil
+}
