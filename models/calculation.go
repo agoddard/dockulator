@@ -197,7 +197,9 @@ func (c *Calculation) GetCalc() error {
 	calculation, err := c.Calc()
 	answer, err := strconv.ParseFloat(calculation, 64)
 	c.Answer = answer
-	c.Error = err.Error()
+	if err != nil {
+		c.Error = err.Error()
+	}
 	return err
 }
 
