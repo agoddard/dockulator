@@ -18,7 +18,7 @@
   </thead> 
   <tbody id="calcbody"> 
     {{range .}}
-    <tr>
+    <tr class="calculation" id="id-{{.Id.Hex}}">
       <td>{{.Calculation}}</td>
       <td>{{.Answer}}</td>
       <td>{{.OS}}</td>
