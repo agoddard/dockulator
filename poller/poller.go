@@ -84,6 +84,7 @@ func notifyServer(id string) {
 func startJob(calculation *models.Calculation) {
 	err := calculation.Calculate()
 	if debug {
+		log.Printf("Calc command: %v\n", calculation.CalcCmd().Args)
 		log.Printf("Calculation: %v\n", calculation.Answer)
 	}
 	if err != nil {
@@ -91,6 +92,7 @@ func startJob(calculation *models.Calculation) {
 	}
 	err = calculation.GetOS()
 	if debug {
+		log.Printf("OS command: %v\n", calculation.OSCmd().Args)
 		log.Printf("OS hint: %v\n", calculation.OS)
 	}
 	if err != nil {
