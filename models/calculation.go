@@ -191,7 +191,7 @@ func (c *Calculation) OSCmd() *exec.Cmd {
 }
 
 func (c *Calculation) CalcCmd() *exec.Cmd {
-	return exec.Command(dockerPath, "run", c.Instance c.calculator(), c.Calculation)
+	return exec.Command(dockerPath, "run", c.Instance, c.calculator(), c.Calculation)
 }
 
 // Calculate will set the Answer attribute of the calculation
