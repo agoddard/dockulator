@@ -217,10 +217,6 @@ func (c *Calculation) String() string {
 	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\n", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error)
 }
 
-func (c *Calculation) String() string {
-	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\n", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error)
-}
-
 // Don't want to modify the actual object
 func (c Calculation) AsJson() ([]byte, error) {
 	c.Language = GetLanguage(c.Language)
