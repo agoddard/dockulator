@@ -176,36 +176,45 @@ func (c *Calculation) calculator() string {
 // GetOS will set the OS attribute of the calculation
 func (c *Calculation) GetOS() error {
 	// example command: `docker run 12345 getos.sh`
-	cmd := exec.Command(dockerPath, "run", c.Instance, osScriptCmd)
+	cmd := c.OSCmd()
 	out, err := cmd.Output()
 	if err != nil {
 		c.Error = err.Error()
-		return err
 	}
 	os := strings.TrimSpace(string(out))
 	c.OS = os
-	return nil
+	return err
+}
+
+func (c *Calculation) OSCmd() *exec.Cmd {
+	return exec.Command(dockerPath, "run", c.Instance, osScriptCmd)
+}
+
+func (c *Calculation) CalcCmd() *exec.Cmd {
+	return exec.Command(dockerPath, "run", c.Instance, c.calculator(), c.Calculation)
 }
 
 // Calculate will set the Answer attribute of the calculation
 func (c *Calculation) Calculate() error {
 	// example command: `docker run 12345 calc.rb 4 + 2`
-	cmd := exec.Command(dockerPath, "run", c.Instance, c.calculator(), c.Calculation)
+	cmd := c.CalcCmd()
 	out, err := cmd.Output()
 	if err != nil {
 		c.Error = err.Error()
 		// TODO: just run the calculation in go
-		return err
 	}
 	floatVal := strings.TrimSpace(string(out))
 	answer, err := strconv.ParseFloat(string(floatVal), 64)
 	if err != nil {
 		c.Error = err.Error()
 		// Something definitely went bad.
-		return err
 	}
 	c.Answer = answer
-	return nil
+	return err
+}
+
+func (c *Calculation) String() string {
+	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\n", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error)
 }
 
 func (c *Calculation) String() string {
