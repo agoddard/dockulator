@@ -13,7 +13,7 @@ import (
 const (
 	maxJobs    = 5 // Run this many `docker` processes concurrently
 	pollDelay  = 2 // in seconds
-	serverUrl = "http://localhost:5000/poller"
+	serverUrl = "http://dockulator.herokuapp.com/poller"
 )
 
 var (
