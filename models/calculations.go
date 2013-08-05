@@ -16,7 +16,7 @@ func GetRecent(n int) Calculations {
 	c := session.DB("").C(db.Collection)
 
 	result := Calculations{}
-	err := c.Find(bson.M{"error": ""}).Sort("-time").Limit(n).All(&result)
+	err := c.Find(nil).Sort("-time").Limit(n).All(&result)
 	if err != nil {
 		log.Printf("Got an error finding recent calculations: %v", err.Error())
 	}

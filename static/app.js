@@ -28,9 +28,11 @@
     var obj = JSON.parse(event['data']);
     switch (obj['type']) {
       case 'new':
+        console.log("new");
         addCalculation(obj['data']);
         break;
       case 'update':
+        console.log("update");
         updateCalculation(obj['data']);
         break;
       case 'error':
