@@ -6,17 +6,14 @@ import (
 	"dockulator/db"
 	"encoding/json"
 	"labix.org/v2/mgo/bson"
-	"os/exec"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 )
 
 const (
 	dockerPath  = "/usr/local/bin/docker"
 	calcPath    = "/opt/dockulator/calculators/"
-	osScriptCmd = "/bin/cat /etc/issue | head -n 1"
 	calcRe      = `(-)?\d+(\.\d+)? [\+\-\/\*] (-)?\d+(\.\d+)?`
 )
 
@@ -173,43 +170,36 @@ func (c *Calculation) calculator() string {
 	return calcPath + "calc." + c.Language
 }
 
+// Get the operating system this command is running on
+func (c *Calculation) OperatingSystem() (string, error) {
+	cmd := NewCommand(dockerPath, "run", c.Instance, "/bin/cat", "/etc/issue")
+	cmd.RegisterCleaner(FirstLine)
+	out, err := cmd.Output()
+	return string(out), err
+}
+
+// Get the answer to the calculation
+func (c *Calculation) Calc() (string, error) {
+	cmd := NewCommand(dockerPath, "run", c.Instance, c.calculator(), c.Calculation)
+	out, err := cmd.Output()
+	return string(out), err
+}
+
 // GetOS will set the OS attribute of the calculation
 func (c *Calculation) GetOS() error {
-	// example command: `docker run 12345 getos.sh`
-	cmd := c.OSCmd()
-	out, err := cmd.Output()
-	if err != nil {
-		c.Error = err.Error()
-	}
-	os := strings.TrimSpace(string(out))
+	os, err := c.OperatingSystem()
 	c.OS = os
 	return err
 }
 
-func (c *Calculation) OSCmd() *exec.Cmd {
-	return exec.Command(dockerPath, "run", c.Instance, osScriptCmd)
-}
-
-func (c *Calculation) CalcCmd() *exec.Cmd {
-	return exec.Command(dockerPath, "run", c.Instance, c.calculator(), c.Calculation)
-}
-
 // Calculate will set the Answer attribute of the calculation
-func (c *Calculation) Calculate() error {
-	// example command: `docker run 12345 calc.rb 4 + 2`
-	cmd := c.CalcCmd()
-	out, err := cmd.Output()
-	if err != nil {
-		c.Error = err.Error()
-		// TODO: just run the calculation in go
-	}
-	floatVal := strings.TrimSpace(string(out))
-	answer, err := strconv.ParseFloat(string(floatVal), 64)
-	if err != nil {
-		c.Error = err.Error()
-		// Something definitely went bad.
-	}
+func (c *Calculation) GetCalc() error {
+	calculation, err := c.Calc()
+	answer, err := strconv.ParseFloat(calculation, 64)
 	c.Answer = answer
+	if err != nil {
+		c.Error = err.Error()
+	}
 	return err
 }
 
@@ -217,7 +207,8 @@ func (c *Calculation) String() string {
 	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\n", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error)
 }
 
-// Don't want to modify the actual object
+// Not a pointer method because we don't want to modify the instance.
+// We want to modify a copy.
 func (c Calculation) AsJson() ([]byte, error) {
 	c.Language = GetLanguage(c.Language)
 	return json.Marshal(c)
