@@ -42,21 +42,18 @@ func main() {
 	for {
 		result := poll()
 		if debug {
-			log.Printf("Poll returned %v results\n", len(result))
+			log.Printf("Poll added a calculation to the queue")
 		}
 
-		for i := 0; i < len(result); i++ {
-			calculation := result[i]
-			calculation.Language = sample(languages)
-			calculation.Instance = sample(oses)
-			jobs <- &calculation
-		}
+		result.Language = sample(languages)
+		result.Instance = sample(oses)
+		jobs <- &result
 		time.Sleep(pollDelay * time.Second)
 	}
 }
 
-func poll() (result models.Calculations) {
-	return models.UnsolvedCalculations()
+func poll() models.Calculation {
+	return models.GetNext()
 }
 
 func sample(slice []string) string {
