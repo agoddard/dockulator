@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+	"log"
 )
 
 const (
@@ -136,37 +137,32 @@ func Get(id string) (c *Calculation, err error) {
 	session := db.GetSession()
 	defer session.Close()
 
-	col := session.DB("").C(db.Collection)
+	col := session.DB("").C(db.Complete)
 
 	err = col.FindId(bson.ObjectIdHex(id)).One(&c)
 	return c, err
 }
 
-// Insert a calculation to mongo
-func (c *Calculation) Insert() (err error) {
+// Insert a calculation to a specified collection
+func (c *Calculation) Insert(collection string) error {
 	session := db.GetSession()
 	defer session.Close()
 
-	col := session.DB("").C(db.Collection)
+	col := session.DB("").C(collection)
 
-	err = col.Insert(c)
+	err := col.Insert(c)
 	return err
 }
 
 // Update the calculation in Mongo
-func (c *Calculation) Save() (err error) {
+func (c *Calculation) Save() {
 	session := db.GetSession()
 	defer session.Close()
 
-	col := session.DB("").C(db.Collection)
-	col.Update(bson.M{"_id": c.Id}, bson.M{"$set": bson.M{
-		"instance": c.Instance,
-		"answer":   c.Answer,
-		"language": c.Language,
-		"os":       c.OS,
-		"error":    c.Error,
-	}})
-	return err
+	if c.Error != "" {
+		c.Insert(db.Error)
+	}
+	c.Insert(db.Complete)
 }
 
 func (c *Calculation) calculator() string {
@@ -221,12 +217,14 @@ func GetNext() (result Calculation) {
 	session := db.GetSession()
 	defer session.Close()
 
-	change := mgo.Change{Update: bson.M{"processing": true}}
-	col := session.DB("").C(db.Collection)
-	col.Find(bson.M{
-		"instance":   "",
-		"error":      "",
-		"processing": false,
-	}).Apply(change, &result)
+	change := mgo.Change{
+		Update: bson.M{"processing": true},
+	}
+	col := session.DB("").C(db.Queue)
+	col.Find(nil).Apply(change, &result)
+	err := col.RemoveId(result.Id)
+	if err != nil {
+		log.Printf("Error removing calculation from queue")
+	}
 	return result
 }
