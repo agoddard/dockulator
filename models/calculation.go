@@ -149,20 +149,29 @@ func (c *Calculation) Insert(collection string) error {
 	defer session.Close()
 
 	col := session.DB("").C(collection)
-
+	log.Printf("Inserting into %v\n%v\n", collection, c)
 	err := col.Insert(c)
 	return err
 }
 
 // Update the calculation in Mongo
 func (c *Calculation) Save() {
+	c.Remove(db.Queue)
+	if c.Error != "" {
+		log.Printf("Inserting %v into Error collection", c)
+		c.Insert(db.Error)
+		return
+	}
+	log.Printf("Completed!\n %v\n", c)
+	c.Insert(db.Complete)
+}
+
+func (c *Calculation) Remove(collection string) error {
 	session := db.GetSession()
 	defer session.Close()
-
-	if c.Error != "" {
-		c.Insert(db.Error)
-	}
-	c.Insert(db.Complete)
+	col := session.DB("").C(collection)
+	log.Printf("Removing this guy from %v:\n%v\n", collection, c)
+	return col.RemoveId(c.Id)
 }
 
 func (c *Calculation) calculator() string {
@@ -203,7 +212,7 @@ func (c *Calculation) GetCalc() error {
 }
 
 func (c *Calculation) String() string {
-	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\n", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error)
+	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\nProcessing: %v", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error, c.Processing)
 }
 
 // Not a pointer method because we don't want to modify the instance.
@@ -213,18 +222,25 @@ func (c Calculation) AsJson() ([]byte, error) {
 	return json.Marshal(c)
 }
 
-func GetNext() (result Calculation) {
+func GetNext() *Calculation {
 	session := db.GetSession()
 	defer session.Close()
+	col := session.DB("").C(db.Queue)
 
 	change := mgo.Change{
-		Update: bson.M{"processing": true},
+		Update: bson.M{"$set": bson.M{"processing": true}},
+		ReturnNew: true,
 	}
-	col := session.DB("").C(db.Queue)
-	col.Find(bson.M{"processing": false}).Apply(change, &result)
-	err := col.RemoveId(result.Id)
+	var result Calculation
+	info, err := col.Find(bson.M{"processing": false}).Apply(change, &result)
+	log.Printf("ChangeInfo:\n%v\n", info)
 	if err != nil {
-		log.Printf("Error removing calculation from queue")
+		log.Printf("Error in GetNext: %v", err)
 	}
-	return result
+	log.Printf("Found: %v\n", result)
+	// If we found anything
+	if result.Processing {
+		return &result
+	}
+	return &Calculation{}
 }
