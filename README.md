@@ -19,10 +19,10 @@ calculation that has an Error will be sent to the "errors" collection.
 
 Setting up a poller environment can be tricky.
 
-1) Have a working docker environment.
-2) Get this repo
-3) Run `make docker`
-4) Run `go run poller/poller.go` or upstart or something
+1. Have a working docker environment.
+2. Get this repo
+3. Run `make docker`
+4. Run `go run poller/poller.go` or upstart or something
 
 ## Compiling
 
