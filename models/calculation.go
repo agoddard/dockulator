@@ -224,7 +224,7 @@ func GetNext() (result Calculation) {
 	col.Find(bson.M{"processing": false}).Apply(change, &result)
 	err := col.RemoveId(result.Id)
 	if err != nil {
-		log.Printf("Error removing calculation from queue")
+		log.Printf("Error removing calculation from queue: %v", err.Error())
 	}
 	return result
 }
