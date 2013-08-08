@@ -41,13 +41,13 @@ func main() {
 
 	for {
 		result := poll()
-		if debug {
-			log.Printf("Poll added a calculation to the queue")
-		}
 
 		if result.Processing {
 			result.Language = sample(languages)
 			result.Instance = sample(oses)
+			if debug {
+				log.Printf("Poll added a calculation to the queue:\n%v\n", result)
+			}
 			jobs <- &result
 		}
 		time.Sleep(pollDelay * time.Second)
