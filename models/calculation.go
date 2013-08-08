@@ -221,7 +221,7 @@ func GetNext() (result Calculation) {
 		Update: bson.M{"processing": true},
 	}
 	col := session.DB("").C(db.Queue)
-	col.Find(nil).Apply(change, &result)
+	col.Find(bson.M{"processing": false}).Apply(change, &result)
 	err := col.RemoveId(result.Id)
 	if err != nil {
 		log.Printf("Error removing calculation from queue")
