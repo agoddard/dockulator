@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go.net/websocket"
 	"dockulator/models"
+	"dockulator/db"
 	"fmt"
 	"html/template"
 	"log"
@@ -78,7 +79,8 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 		found := models.CleanCalculation(calculation)
 		if found != "error" {
 			calc := models.NewCalculation(found)
-			calc.Insert()
+			// Add them to the queue
+			calc.Insert(db.Queue)
 			w.Header().Add("Content-type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusCreated)
 			b, err := calc.AsJson()

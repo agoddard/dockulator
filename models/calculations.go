@@ -12,7 +12,7 @@ func GetRecent(n int) Calculations {
 	session := db.GetSession()
 	defer session.Close()
 
-	c := session.DB("").C(db.Collection)
+	c := session.DB("").C(db.Complete)
 
 	result := Calculations{}
 	err := c.Find(nil).Sort("-time").Limit(n).All(&result)
