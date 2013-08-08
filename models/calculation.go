@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	dockerPath  = "/usr/local/bin/docker"
+	dockerPath  = "docker"
 	calcPath    = "/opt/dockulator/calculators/"
 	calcRe      = `(-)?\d+(\.\d+)? [\+\-\/\*] (-)?\d+(\.\d+)?`
 )
