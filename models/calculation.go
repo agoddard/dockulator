@@ -1,10 +1,11 @@
 package models
 
 import (
-	"fmt"
 	"bytes"
 	"dockulator/db"
 	"encoding/json"
+	"fmt"
+	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"os/exec"
 	"regexp"
@@ -33,6 +34,7 @@ type Calculation struct {
 	Instance    string        `json:"-"`
 	Time        time.Time     `json:"timestamp"`
 	Error       string        `json:"-"`
+	Processing  bool          `json:"-"`
 }
 
 // Return an empty calculation
@@ -46,6 +48,7 @@ func NewCalculation(calculation string) *Calculation {
 		Id:          bson.NewObjectId(),
 		Time:        bson.Now(),
 		Error:       "",
+		Processing:  false,
 	}
 }
 
@@ -221,4 +224,18 @@ func (c *Calculation) String() string {
 func (c Calculation) AsJson() ([]byte, error) {
 	c.Language = GetLanguage(c.Language)
 	return json.Marshal(c)
+}
+
+func GetNext() (result Calculation) {
+	session := db.GetSession()
+	defer session.Close()
+
+	change := mgo.Change{Update: bson.M{"processing": true}}
+	col := session.DB("").C(db.Collection)
+	col.Find(bson.M{
+		"instance":   "",
+		"error":      "",
+		"processing": false,
+	}).Apply(change, &result)
+	return result
 }
