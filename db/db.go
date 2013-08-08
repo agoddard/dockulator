@@ -18,7 +18,9 @@ var (
 )
 
 const (
-	Collection = "calculations"
+	Complete = "calculations"
+	Error = "errors"
+	Queue = "queue"
 )
 
 func GetSession() *mgo.Session {
