@@ -219,12 +219,15 @@ func GetNext() (result Calculation) {
 
 	change := mgo.Change{
 		Update: bson.M{"processing": true},
+		ReturnNew: true,
 	}
 	col := session.DB("").C(db.Queue)
 	col.Find(bson.M{"processing": false}).Apply(change, &result)
-	err := col.RemoveId(result.Id)
-	if err != nil {
-		log.Printf("Error removing calculation from queue: %v", err.Error())
+	if result.Processing {
+		err := col.RemoveId(result.Id)
+		if err != nil {
+			log.Printf("Error removing calculation from queue: %v", err.Error())
+		}
 	}
 	return result
 }
