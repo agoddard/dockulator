@@ -156,11 +156,9 @@ func (c *Calculation) Insert(collection string) error {
 
 // Update the calculation in Mongo
 func (c *Calculation) Save() {
-	session := db.GetSession()
-	defer session.Close()
-
 	if c.Error != "" {
 		c.Insert(db.Error)
+		return
 	}
 	c.Insert(db.Complete)
 }
@@ -203,7 +201,7 @@ func (c *Calculation) GetCalc() error {
 }
 
 func (c *Calculation) String() string {
-	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\n", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error)
+	return fmt.Sprintf("Calculation: %v\nOS: %v\nLanguage: %v\nAnswer: %v\nInstance: %v\nError: %v\nProcessing: %v", c.Calculation, c.OS, c.Language, c.Answer, c.Instance, c.Error, c.Processing)
 }
 
 // Not a pointer method because we don't want to modify the instance.
@@ -228,6 +226,7 @@ func GetNext() (result Calculation) {
 		if err != nil {
 			log.Printf("Error removing calculation from queue: %v", err.Error())
 		}
+		return result
 	}
-	return result
+	return Calculation{}
 }
