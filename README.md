@@ -9,17 +9,6 @@ Having a go compiler compiled to build linux binaries is required for building l
 I found running `brew uninstall go && brew install go --cross-compile-common` worked well.
 Then simply run `make linux` for linux binaries and `make` for local binaries.
 
-
-####user hits web server
-####user enters a calculation
-####calculation is stored in mongo as follows:
-
-####docker middleware polls redis for calculations with no answer
-####docker middleware receives a calculation, spins up random docker OS/language combination
-MVP - use shell-out and then switch to HTTP/API later
-####docker receives request for OS/language, runs request, responds via HTTP PUT to ?
-    PUT data-->Mongo unique ID, request ID, metadata, calculation response
-
 ## Calculator APIs
 
 Each calculator must adhere to the same API.
@@ -37,26 +26,6 @@ Each calculator must adhere to the same API.
 * Datastore: [MongoDB](http://mongodb.org) -- Stores data
 * Poller: Go -- Looks for empty calculations and passes them off to Docker
 * Containerization: [Docker](http://docker.io) -- Does calculation
-
-## Use Case
-
-1. Bianca goes to dockulator.com
-1. She sees a form to do a calculation
-2. She types a calculation into the form
-3. She submits the form
-  1. The form goes to the webserver
-  2. The webserver parses the input
-  3. If valid, the input is sent to mongodb
-4. Bianca's browser is constantly polling (or getting push data from a websocket) for new calculations
-5. Eventually she sees her calculation complete
-
-## WebServer API
-
-    GET  /                 -- Home page
-    GET  /calculations     -- Calculation list view
-    GET  /calculations/:id -- Calculation detail view
-    POST /calculations     -- Creates a new calculation in MongoDB
-
 
 ## Calculation Model
 

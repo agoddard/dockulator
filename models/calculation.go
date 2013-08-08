@@ -182,6 +182,7 @@ func (c *Calculation) calculator() string {
 func (c *Calculation) OperatingSystem() (string, error) {
 	cmd := NewCommand(dockerPath, "run", c.Instance, "/bin/cat", "/etc/issue")
 	cmd.RegisterCleaner(FirstLine)
+	cmd.RegisterCleaner(StripWeirdChars)
 	out, err := cmd.Output()
 	return string(out), err
 }

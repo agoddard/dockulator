@@ -19,7 +19,7 @@ const (
 
 var (
 	throttle  = make(chan int, maxJobs)
-	oses      = []string{"9251ec60f05a", "2bcc9128dbce"}
+	oses      = []string{"dockulator-ubuntu", "dockulator-centos"}
 	languages = []string{"rb"}
 	debug bool
 )
