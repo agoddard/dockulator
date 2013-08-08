@@ -160,11 +160,12 @@ func (c *Calculation) Save() (err error) {
 
 	col := session.DB("").C(db.Collection)
 	col.Update(bson.M{"_id": c.Id}, bson.M{"$set": bson.M{
-		"instance": c.Instance,
-		"answer":   c.Answer,
-		"language": c.Language,
-		"os":       c.OS,
-		"error":    c.Error,
+		"instance":   c.Instance,
+		"answer":     c.Answer,
+		"language":   c.Language,
+		"os":         c.OS,
+		"error":      c.Error,
+		"processing": true,
 	}})
 	return err
 }
