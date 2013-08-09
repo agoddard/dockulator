@@ -149,18 +149,29 @@ func (c *Calculation) Insert(collection string) error {
 	defer session.Close()
 
 	col := session.DB("").C(collection)
-
+	log.Printf("Inserting into %v\n%v\n", collection, c)
 	err := col.Insert(c)
 	return err
 }
 
 // Update the calculation in Mongo
 func (c *Calculation) Save() {
+	c.Remove(db.Queue)
 	if c.Error != "" {
+		log.Printf("Inserting %v into Error collection", c)
 		c.Insert(db.Error)
 		return
 	}
+	log.Printf("Completed!\n %v\n", c)
 	c.Insert(db.Complete)
+}
+
+func (c *Calculation) Remove(collection string) error {
+	session := db.GetSession()
+	defer session.Close()
+	col := session.DB("").C(collection)
+	log.Printf("Removing this guy from %v:\n%v\n", collection, c)
+	return col.RemoveId(c.Id)
 }
 
 func (c *Calculation) calculator() string {
@@ -171,6 +182,7 @@ func (c *Calculation) calculator() string {
 func (c *Calculation) OperatingSystem() (string, error) {
 	cmd := NewCommand(dockerPath, "run", c.Instance, "/bin/cat", "/etc/issue")
 	cmd.RegisterCleaner(FirstLine)
+	cmd.RegisterCleaner(StripWeirdChars)
 	out, err := cmd.Output()
 	return string(out), err
 }
@@ -211,22 +223,25 @@ func (c Calculation) AsJson() ([]byte, error) {
 	return json.Marshal(c)
 }
 
-func GetNext() (result Calculation) {
+func GetNext() *Calculation {
 	session := db.GetSession()
 	defer session.Close()
+	col := session.DB("").C(db.Queue)
 
 	change := mgo.Change{
-		Update: bson.M{"processing": true},
+		Update: bson.M{"$set": bson.M{"processing": true}},
 		ReturnNew: true,
 	}
-	col := session.DB("").C(db.Queue)
-	col.Find(bson.M{"processing": false}).Apply(change, &result)
-	if result.Processing {
-		err := col.RemoveId(result.Id)
-		if err != nil {
-			log.Printf("Error removing calculation from queue: %v", err.Error())
-		}
-		return result
+	var result Calculation
+	info, err := col.Find(bson.M{"processing": false}).Apply(change, &result)
+	log.Printf("ChangeInfo:\n%v\n", info)
+	if err != nil {
+		log.Printf("Error in GetNext: %v", err)
 	}
-	return Calculation{}
+	log.Printf("Found: %v\n", result)
+	// If we found anything
+	if result.Processing {
+		return &result
+	}
+	return &Calculation{}
 }

@@ -14,12 +14,12 @@ import (
 const (
 	maxJobs    = 5 // Run this many `docker` processes concurrently
 	pollDelay  = 2 // in seconds
-	serverUrl = "http://dockulator.herokuapp.com/poller"
+	serverUrl = "http://dockulator.com/poller"
 )
 
 var (
 	throttle  = make(chan int, maxJobs)
-	oses      = []string{"3b89fe9d1dfe"}
+	oses      = []string{"dockulator-ubuntu", "dockulator-centos"}
 	languages = []string{"rb"}
 	debug bool
 )
@@ -48,13 +48,17 @@ func main() {
 			if debug {
 				log.Printf("Poll added a calculation to the queue:\n%v\n", result)
 			}
-			jobs <- &result
+			jobs <- result
+		} else {
+			if debug {
+				log.Printf("No Calculations Found")
+			}
 		}
 		time.Sleep(pollDelay * time.Second)
 	}
 }
 
-func poll() models.Calculation {
+func poll() *models.Calculation {
 	return models.GetNext()
 }
 
