@@ -1,3 +1,48 @@
+# Distributed Dockulator. A laptop cloud.
+
+A user boots a VM through a Vagrantfile we provide.
+
+It asks them for an email.
+        The email is sent to our auth server to register this user.
+        The user is registered by email and is returned a key.
+        This key is used to sign all of their requests. # As an environment variale or something.
+The user now has poller running in the background.
+
+## Questions for Anthony:
+
+* Does the poller talk directly to Mongo? I think that's a bad idea.
+* Does the poller just talk to a webserver?
+        * Perhaps it polls dockulator.com/next?key=SOME_SECRET_KEY
+        * then dockulator.com/next looks at the key and verifies it
+                * dockulator.com/next pings mongo and gets a calculation back
+                * dockulator.com/next responds to the poller with json
+        * the poller runs the calculation and sends it to dockulator.com/add?key=SOME_SECRET_KEY
+                * dockulator.com/add verifies the request
+                * dockulator.com/add sends the result to either the error queue or the completed queue.
+                * Note: we could even do something clever like any time a user returns an error status, 
+                        we put it in the error queue and then add the same calculation back to the processing queue.
+
+So we have
+
+1) Webserver that is responsible for
+        1) Serving a UI
+        2) Validating new calculations
+        3) Adding calculations to the processing queue
+2) Mongodb is responsible for
+        1) Acting as a processing queue
+        2) Acting as a datastore for completed calculations
+        3) Acting as an error store for errored calculations
+3) An auth server that is responsible for
+        1) registering laptops
+        2) distributing keys
+        3) validating requests
+        4) getting items off the queue
+        5) adding calculations to the completed/error collection
+        6) collects stats on laptop pollers
+3) A single laptop poller
+        1) running calculations
+        2) telling the auth server about a completed calculation
+
 # Dockulator
 
 A slightly over the top calculator that uses Docker to run your calculation on
