@@ -67,6 +67,10 @@ func FirstLine(in []byte) []byte {
 	return bytes.Split(in, []byte("\n"))[0]
 }
 
+func StripWeirdChars(in []byte) []byte {
+	return bytes.TrimSuffix(in, []byte(" \\n \\l"))
+}
+
 /* Example usage:
 func main() {
 	cmd := NewCommand("docker", "run", "7662e12d0778", "/dockulator/calculators/calc.rb", "23 + 44")
