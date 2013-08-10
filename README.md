@@ -1,4 +1,4 @@
-# Distributed Dockulator. A laptop cloud.
+# Distributed Dockulator. A laptop cloud calculator.
 
 A user boots a VM through a Vagrantfile we provide.
 
@@ -8,19 +8,19 @@ It asks them for an email.
         This key is used to sign all of their requests. # As an environment variale or something.
 The user now has poller running in the background.
 
-## Questions for Anthony:
+## Steps:
 
-* Does the poller talk directly to Mongo? I think that's a bad idea.
-* Does the poller just talk to a webserver?
-        * Perhaps it polls dockulator.com/next?key=SOME_SECRET_KEY
+* Poller makes an API call to a dockulator.com
+        * It polls dockulator.com/next?key=SOME_SECRET_KEY #or uses auth headers
         * then dockulator.com/next looks at the key and verifies it
-                * dockulator.com/next pings mongo and gets a calculation back
+                * dockulator.com/next retrieves a calculation from mongo, moves it into the processing queue
                 * dockulator.com/next responds to the poller with json
         * the poller runs the calculation and sends it to dockulator.com/add?key=SOME_SECRET_KEY
                 * dockulator.com/add verifies the request
                 * dockulator.com/add sends the result to either the error queue or the completed queue.
                 * Note: we could even do something clever like any time a user returns an error status, 
                         we put it in the error queue and then add the same calculation back to the processing queue.
+                        we could also move calculations back to the queue if they aren't processed within x time (in case the client drops off). This would probably also require a poller to use a timestamp to ignore any calculation it has that's over x time old. (in case client comes back online after dropping off)
 
 So we have
 
