@@ -103,7 +103,7 @@
       obj = arguments[i];
       el = document.createElement('tr');
       el.className = 'calculation';
-      el.id = obj['id'];
+      el.id = "id-" + obj['id'];
       console.log(el);
       tmpl = calc.render(obj);
       el.appendChild(tmpl);
