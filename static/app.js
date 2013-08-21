@@ -7,7 +7,7 @@
       addCalculation(data);
       return
     }
-    el.parentNode.removeChild(el);
+    el.remove();
     addCalculation(data);
   };
   var addCalculations = function (data) {
