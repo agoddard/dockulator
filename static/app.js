@@ -113,12 +113,12 @@
   };
 
   calc.getCalculation = function () {
-    var calcInputId = '#input-calculation';
     input = $(calcInputId).val();
     return input;
   };
 
   var calcFormId = '#new-calculation';
+  var calcInputId = '#input-calculation';
 
   $('#new-calculation').on('submit', function (event) {
     $.ajax({
@@ -128,7 +128,7 @@
         'calculation': calc.getCalculation()
       }
     }).done(function (data) {
-      console.log(data);
+      $(calcInputId).val('');
     });
     return false;
   });
