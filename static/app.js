@@ -1,5 +1,5 @@
 ;(function (websock) {
-  websock.ws = new WebSocket("ws://localhost:5000/websock");
+  websock.ws = new WebSocket("ws://dockulator.com/websock");
 
   var updateCalculation = function (data) {
     var el = $('#id-' + data['id']);
