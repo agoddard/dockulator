@@ -135,3 +135,13 @@
 
 }(window.calc = window.calc || {}, jQuery));
 
+
+;(function ($) {
+  $('#hideme').on('click', function () { 
+    if (this.innerHTML === "Hide info") {
+      this.innerHTML = "Show info";
+    } else {
+      this.innerHTML = "Hide info";
+    }
+  });
+}(jQuery));

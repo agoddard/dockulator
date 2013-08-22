@@ -1,0 +1,44 @@
+p a{
+  text-decoration: underline;
+}
+
+a {
+  color: #333;
+}
+
+a:hover {
+  color: #0a0a0a;
+}
+
+header {
+  background-color: #5084BB;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+footer {
+  background-color: #DD6251;
+}
+
+.glyphicon {
+  padding-right: 5px;
+}
+
+form {
+  padding: 10px;
+  width: 100%;
+}
+
+#input-calculation {
+  width: 65%;
+}
+
+
+.btn {
+  padding: 2px;
+  margin-top: -2px;
+}
+
+#submit-calc {
+  width: 30%;
+}
