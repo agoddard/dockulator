@@ -1,29 +1,8 @@
-# Distributed Dockulator. A laptop cloud calculator.
+# Dockulator. A Docker powered calculator.
 
-A user boots a VM through a Vagrantfile we provide.
+A slightly over the top calculator that uses Docker to run your calculation on a random OS + language combination.
 
-It asks them for an email.
-        The email is sent to our auth server to register this user.
-        The user is registered by email and is returned a key.
-        This key is used to sign all of their requests. # As an environment variale or something.
-The user now has poller running in the background.
-
-## Steps:
-
-* Poller makes an API call to a dockulator.com
-        * It polls dockulator.com/next?key=SOME_SECRET_KEY #or uses auth headers
-        * then dockulator.com/next looks at the key and verifies it
-                * dockulator.com/next retrieves a calculation from mongo, moves it into the processing queue
-                * dockulator.com/next responds to the poller with json
-        * the poller runs the calculation and sends it to dockulator.com/add?key=SOME_SECRET_KEY
-                * dockulator.com/add verifies the request
-                * dockulator.com/add sends the result to either the error queue or the completed queue.
-                * Note: we could even do something clever like any time a user returns an error status, 
-                        we put it in the error queue and then add the same calculation back to the processing queue.
-                        we could also move calculations back to the queue if they aren't processed within x time (in case the client drops off). This would probably also require a poller to use a timestamp to ignore any calculation it has that's over x time old. (in case client comes back online after dropping off)
-
-So we have
-
+# Architecture
 1) Webserver that is responsible for
         1) Serving a UI
         2) Validating new calculations
@@ -32,29 +11,13 @@ So we have
         1) Acting as a processing queue
         2) Acting as a datastore for completed calculations
         3) Acting as an error store for errored calculations
-3) An auth server that is responsible for
-        1) registering laptops
-        2) distributing keys
-        3) validating requests
-        4) getting items off the queue
-        5) adding calculations to the completed/error collection
-        6) collects stats on laptop pollers
-3) A single laptop poller
+3) One or more pollers
         1) running calculations
-        2) telling the auth server about a completed calculation
-
-# Dockulator
-
-A slightly over the top calculator that uses Docker to run your calculation on
-a random OS + language combination.
+        2) telling Montodb about a completed calculation
 
 ## Poller
 
-Poller is probably a misleading name at this point. It does indeed poll the
-Mongo collection "queue" to find unprocessed calculations, but it also is
-responsible for telling the calculations to calculate themselves as well as
-organizing responses into the correct collections. For instance, any
-calculation that has an Error will be sent to the "errors" collection.
+Poller monitors Mongodb for new calculations and tells docker to run these calculations in a container, choosing a specific image and language to run the calculation with. Poller is also responsible for processing the output from the docker container, organizing the responses in Mongodb, and error handling
 
 ### Flags
 
@@ -65,16 +28,13 @@ calculation that has an Error will be sent to the "errors" collection.
 Setting up a poller environment can be tricky.
 
 1. Have a working docker environment.
-2. Get this repo
+2. Clone this repo
 3. Run `make docker`
-4. Run `go run poller/poller.go` or upstart or something
+4. Run `go run poller/poller.go`
 
 ## Compiling
 
-Having a go compiler compiled to build linux binaries is required for building
-linux binaries.  I found running `brew uninstall go && brew install go
---cross-compile-common` worked well.  Then simply run `make linux` for linux
-binaries and `make` for local binaries.
+Having a go compiler compiled to build linux binaries is required for building linux binaries. Under OS X, running `brew uninstall go && brew install go --cross-compile-common` worked well. Then simply run `make linux` for linux binaries and `make` for local binaries.
 
 ## Calculator APIs
 
