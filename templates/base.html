@@ -11,21 +11,27 @@
     <header>
       <div class="container">
         <h1><a href="http://dockulator.com">Dockulator</a></h1>
-        <a href="mailto:#"><span class="glyphicon glyphicon-bullhorn"></span><small>Tell us what you think!</small></a>
+        <a href="https://twitter.com/intent/tweet?text=%40chuck_ha%20%40anthonygoddard%20"><img src="/static/img/twitter-bird-dark-bgs.png" /><small>Tell us what you think!</small></a>
       </div>
     </header>
     <div class="container">
       <div class="panel panel-default">
-        <div class="panel-heading">What's going on here?</div>
-        <div class="panel-body">
-          <p>When you enter a calculation in the box (such as <code>1+4</code>, 
-          <code>23.33/14.12</code> or <code>-1000.0002/121.33</code>) it gets
-          added to a queue.  When a calculation is added to the queue it is picked up
-          by a service watching the queue. The calculation is then assigned a random
-          operating system and programming language. With the help of Docker, it
-          figures out how and where to compute the given calculation. The calculation
-          is added back to a completed list of calculations and that is what you see
-          below.</p>
+        <div class="panel-heading">What's going on here?
+          <span class="pull-right" data-toggle="collapse" data-target="#info"><button class="btn" id="hideme">Hide info</button></span>
+        </div>
+        <div class="panel-body collapse in" id="info">
+          <p>When you enter a calculation in the <a href="#box">box below</a>
+          (such as <code>1+4</code>, <code>23.33/14.12</code> or
+          <code>-1000.0002/121.33</code>) it gets added to a queue. There is a
+          service watching the queue for new calculations.  When that service
+          picks up a new calculation, it assigns it a random operating system
+          and a random programming language.
+          </p>
+
+          <p>With the help of <a href="http://docker.io">Docker</a>, we're able to run the
+          correct programming language on the correct OS and return you an
+          answer all very quickly!
+          </p>
         </div> <!-- end panel-body -->
       </div>
       {{template "content" .}}
