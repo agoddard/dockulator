@@ -3,17 +3,19 @@
 A slightly over the top calculator that uses Docker to run your calculation on a random OS + language combination.
 
 # Architecture
-1) Webserver that is responsible for
-        1) Serving a UI
-        2) Validating new calculations
-        3) Adding calculations to the processing queue
-2) Mongodb is responsible for
-        1) Acting as a processing queue
-        2) Acting as a datastore for completed calculations
-        3) Acting as an error store for errored calculations
-3) One or more pollers
-        1) running calculations
-        2) telling Montodb about a completed calculation
+
+
+1. Webserver that is responsible for
+    1. Serving a UI
+    2. Validating new calculations
+    3. Adding calculations to the processing queue
+2. Mongodb that is responsible for
+    1. Acting as a processing queue
+    2. Acting as a datastore for completed calculations
+    3. Acting as an error store for errored calculations
+3. One or more pollers that are responsible for
+    1. running calculations
+    2. telling Montodb about a completed calculation
 
 ## Poller
 
