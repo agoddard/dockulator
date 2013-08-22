@@ -1,0 +1,21 @@
+a {
+  color: #333;
+}
+
+a:hover {
+  color: #0a0a0a;
+}
+
+header {
+  background-color: #5084BB;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+footer {
+  background-color: #DD6251;
+}
+
+.glyphicon {
+  padding-right: 5px;
+}
