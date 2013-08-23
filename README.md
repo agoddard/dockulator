@@ -1,8 +1,8 @@
-# Dockulator. A Docker powered calculator.
+## Dockulator. A Docker powered calculator.
 
 A slightly over the top calculator that uses Docker to run your calculation on a random OS + language combination.
 
-# Architecture
+## Architecture
 
 
 1. Webserver that is responsible for
