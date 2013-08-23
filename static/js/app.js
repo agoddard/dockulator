@@ -1,7 +1,6 @@
 ;(function (websock) {
   if ("WebSocket" in window) {
-    ws = new WebSocket("ws://localhost:5000/websock");
-    //websock.ws = new WebSocket("ws://dockulator.com/websock");
+    ws = new WebSocket("ws://dockulator.com/websock");
     ws.onopen = function () {};
     ws.onclose = function () {
       // This is when the server closes the connection
