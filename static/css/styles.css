@@ -18,6 +18,8 @@ header {
 
 footer {
   background-color: #DD6251;
+  padding-top: 10px;
+  text-align: center;
 }
 
 .glyphicon {
@@ -33,7 +35,6 @@ form {
   width: 65%;
 }
 
-
 .btn {
   padding: 2px;
   margin-top: -2px;
@@ -41,4 +42,17 @@ form {
 
 #submit-calc {
   width: 30%;
+}
+
+.panel-primary>.panel-heading {
+  background-color: #5084BB;
+  border-color: #5084BB;
+}
+
+input[type="text"] {
+  border-color: rgb(238, 238, 238);
+}
+
+.btn {
+  background-color: rgb(192, 192, 192);
 }
