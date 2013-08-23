@@ -36,10 +36,10 @@
 
   websock.updateCalculation = function (data) {
     var c = new calc.Calculation(data);
-    if (c.el.length == 0) {
+    if (c.el().length == 0) {
       c.render()
     } else {
-      c.el.remove();
+      c.el().remove();
       c.render();
     }
   };
