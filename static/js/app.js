@@ -101,7 +101,7 @@
     tableEl.insertBefore(trEl, tableEl.firstChild);
   };
 
-  calc.Calculation.el = function() { return $('#' + this.id); };
+  calc.Calculation.prototype.el = function() { return $('#' + this.id); };
 
   var getDisplayLanguage = function (language) {
     switch (language) {
