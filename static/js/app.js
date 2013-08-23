@@ -1,66 +1,110 @@
 ;(function (websock) {
-  websock.ws = new WebSocket("ws://dockulator.com/websock");
+  if ("WebSocket" in window) {
+    ws = new WebSocket("ws://localhost:5000/websock");
+    //websock.ws = new WebSocket("ws://dockulator.com/websock");
+    ws.onopen = function () {};
+    ws.onclose = function () {
+      // This is when the server closes the connection
+    };
+    ws.onerror = function () {};
 
-  var updateCalculation = function (data) {
-    var el = $('#id-' + data['id']);
-    if (el.length == 0) {
-      addCalculation(data);
-      return
+    ws.sendmsg = function (message) {
+      ws.send(message);
+    };
+
+    ws.onmessage = function (event) {
+      if (event.data == 'ping') { return; }
+      var obj = JSON.parse(event['data']);
+      switch (obj['type']) {
+        case 'new':
+          websock.newCalculation(obj['data']);
+          break;
+        case 'update':
+          websock.updateCalculation(obj['data']);
+          break;
+        case 'error':
+          error(obj['data']);
+          break;
+        default:
+          break;
+      }
+    };
+
+    websock.ws = ws;
+  } else {
+    websock.ws = {};
+  }
+
+  websock.updateCalculation = function (data) {
+    var c = new calc.Calculation(data);
+    if (c.el.length == 0) {
+      c.render()
+    } else {
+      c.el.remove();
+      c.render();
     }
-    el.remove();
-    addCalculation(data);
-  };
-  var addCalculations = function (data) {
-    calc.insert.apply(null, data);
-  };
-  var addCalculation = function (data) {
-    calc.insert.apply(null, [data]);
-  };
-  var error = function (error) {
-    console.log("Got an error from the server:", error);
   };
 
-  websock.ws.onmessage = function (event) {
-    if (event.data == 'ping') {
-      return;
-    }
-    console.log(event.data);
-    var obj = JSON.parse(event['data']);
-    switch (obj['type']) {
-      case 'new':
-        console.log("new");
-        addCalculation(obj['data']);
-        break;
-      case 'update':
-        console.log("update");
-        updateCalculation(obj['data']);
-        break;
-      case 'error':
-        error(obj['data']);
-        break;
-      default:
-        console.log("Got a message, unsure how to proceed")
-        console.log(event);
-        break;
-    }
+  websock.addCalculation = function (data) {
+    var c = new calc.Calculation(data);
+    c.render();
   };
 
-  websock.ws.onopen = function () {};
-
-  websock.ws.onclose = function () {
-    // This is when the server closes the connection
+  websock.newCalculation = function (data) {
+    data.answer = 'Calculating...';
+    var c = new calc.Calculation(data);
+    c.render('warning');
   };
 
-  websock.ws.onerror = function () {};
-
-  websock.ws.sendmsg = function (message) {
-    websock.ws.send(message);
+  websock.error = function (error) {
   };
 
 }(window.websock = window.websock || {}));
 
 ;(function (calc, $) {
-  calc.getDisplayLanguage = function (language) {
+  calc.Calculation = function (obj) {
+    this.id = 'id-' + obj['id'];
+    this.calculation = obj['calculation'];
+    this.language = obj['language'];
+    this.displayLang = getDisplayLanguage(obj['language']);
+    this.answer = obj['answer'];
+    this.os = obj['os'];
+  };
+
+  calc.Calculation.prototype.render = function (className) {
+    var c = document.createElement('td'),
+        ctext = document.createTextNode(this.calculation),
+        a = document.createElement('td'),
+        atext = document.createTextNode(this.answer),
+        o = document.createElement('td'),
+        otext = document.createTextNode(this.os),
+        l = document.createElement('td'),
+        ltext = document.createTextNode(this.displayLang),
+
+        tableEl = document.getElementById("calcbody"),
+        trEl = document.createElement('tr');
+
+    c.appendChild(ctext);
+    a.appendChild(atext);
+    o.appendChild(otext);
+    l.appendChild(ltext);
+
+    // Do something cute for the class names
+    l.className = this.language;
+
+    trEl.appendChild(c);
+    trEl.appendChild(a);
+    trEl.appendChild(o);
+    trEl.appendChild(l);
+    trEl.className = className;
+    trEl.id = this.id;
+
+    tableEl.insertBefore(trEl, tableEl.firstChild);
+  };
+
+  calc.Calculation.el = function() { return $('#' + this.id); };
+
+  var getDisplayLanguage = function (language) {
     switch (language) {
       case 'rb':
         return 'Ruby';
@@ -69,79 +113,69 @@
     }
   };
 
-  calc.render = function (obj) {
-    var c = document.createElement('td'),
-        ctext = document.createTextNode(obj['calculation']),
-        a = document.createElement('td'),
-        atext = document.createTextNode(obj['answer']),
-        o = document.createElement('td'),
-        otext = document.createTextNode(obj['os']),
-        l = document.createElement('td'),
-        ltext = document.createTextNode(calc.getDisplayLanguage(obj['language'])),
-        frag = document.createDocumentFragment();
+}(window.calc = window.calc || {}, jQuery));
 
-    c.appendChild(ctext);
-    a.appendChild(atext);
-    o.appendChild(otext);
-    l.appendChild(ltext);
 
-    frag.appendChild(c);
-    frag.appendChild(a);
-    frag.appendChild(o);
-    frag.appendChild(l);
-    return frag;
-  };
+// Init stuff
+;(function ($) {
+  var hideSel = '#hideme',
+      calcInputSel = '#input-calculation',
+      formSel = '#new-calculation',
+      hideKey = 'hideInfo';
 
-  calc.insert = function() {
-    var i = 0, 
-        len = arguments.length,
-        tableEl = document.getElementById("calcbody"),
-        frag = document.createDocumentFragment(),
-        obj, el, tmpl;
-
-    for (;i < arguments.length; i++) {
-      obj = arguments[i];
-      el = document.createElement('tr');
-      el.className = 'calculation';
-      el.id = "id-" + obj['id'];
-      console.log(el);
-      tmpl = calc.render(obj);
-      el.appendChild(tmpl);
-      frag.appendChild(el);
+  var hasLocalStorage = function () {
+    try {
+      return 'localStorage' in window && window['localStorage'] !== null;
+    } catch(e){
+      return false;
     }
-    tableEl.insertBefore(frag, tableEl.firstChild);
   };
 
-  calc.getCalculation = function () {
-    input = $(calcInputId).val();
+  var getCalculation = function () {
+    input = $(calcInputSel).val();
     return input;
   };
 
-  var calcFormId = '#new-calculation';
-  var calcInputId = '#input-calculation';
+  var alwaysHide = function () {
+    if (hasLocalStorage()) {
+      localStorage.setItem(hideKey, true);
+    }
+  };
 
-  $('#new-calculation').on('submit', function (event) {
+  var alwaysShow = function () {
+    if (hasLocalStorage()) {
+      localStorage.removeItem(hideKey);
+    }
+  };
+
+  $(hideSel).on('click', function () { 
+    if (this.innerHTML === "Hide info") {
+      alwaysHide();
+      this.innerHTML = "Show info";
+    } else {
+      alwaysShow();
+      this.innerHTML = "Hide info";
+    }
+  });
+
+  if (hasLocalStorage()) {
+    if (localStorage.getItem(hideKey)) {
+      $(hideSel).click();
+    }
+  }
+
+  $(formSel).on('submit', function (event) {
     $.ajax({
       type: 'POST',
       url: '/calculations',
       data: {
-        'calculation': calc.getCalculation()
+        'calculation': getCalculation()
+      },
+      beforeSend: function () {
+        $(calcInputSel).val('');
       }
-    }).done(function (data) {
-      $(calcInputId).val('');
-    });
+    }).done(function (data) {});
     return false;
   });
 
-}(window.calc = window.calc || {}, jQuery));
-
-
-;(function ($) {
-  $('#hideme').on('click', function () { 
-    if (this.innerHTML === "Hide info") {
-      this.innerHTML = "Show info";
-    } else {
-      this.innerHTML = "Hide info";
-    }
-  });
 }(jQuery));

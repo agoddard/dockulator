@@ -1,7 +1,7 @@
 {{define "content"}}
 <div class="panel panel-primary">
   <div class="panel-heading">Enter a new calculation</div>
-  <form id="new-calculation">
+  <form id="new-calculation" action="/calculations" method="POST">
     <a name="box"></a>
     <input type="text" name="calculation" id="input-calculation" placeholder="Enter a calculation like 1 * 3" />
     <input class="btn pull-right" type="submit" value="calculate" id="submit-calc" />
@@ -22,11 +22,11 @@
   </thead> 
   <tbody id="calcbody"> 
     {{range .}}
-    <tr class="calculation" id="id-{{.Id.Hex}}">
+    <tr id="id-{{.Id.Hex}}">
       <td>{{.Calculation}}</td>
       <td>{{.Answer}}</td>
       <td>{{.OS}}</td>
-      <td>{{lang .Language }}</td>
+      <td class="{{.Language}}">{{lang .Language }}</td>
     </tr>
     {{end}}
   </tbody> 
