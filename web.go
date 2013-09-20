@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 func init() {
@@ -38,10 +37,10 @@ var (
 
 type Clients []*websocket.Conn
 
-func (c *Clients) AddClient(ws *websocket.Conn) {
+func (c Clients) AddClient(ws *websocket.Conn) {
 	c = append(c, ws)
 }
-func (c *Clients) RemoveClient(ws *websocket.Conn) {
+func (c Clients) RemoveClient(ws *websocket.Conn) {
 	for i, client := range c {
 		if client == ws {
 			c = append(c[:i], c[i+1:]...)
@@ -50,7 +49,7 @@ func (c *Clients) RemoveClient(ws *websocket.Conn) {
 	}
 }
 
-func (c *Clients) SendAll(msg string, data interface{}) {
+func (c Clients) SendAll(msg string, data interface{}) {
 	message := BuildMsg(msg, data)
 	for _, client := range c {
 		websocket.JSON.Send(client, message)
