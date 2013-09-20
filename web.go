@@ -2,8 +2,8 @@ package main
 
 import (
 	"code.google.com/p/go.net/websocket"
-	"dockulator/models"
 	"dockulator/db"
+	"dockulator/models"
 	"fmt"
 	"html/template"
 	"log"
@@ -20,9 +20,8 @@ func init() {
 }
 
 const (
-	basePath   = "/calculations/"
-	lenPath    = len(basePath)
-	pruneEvery = 10 // minutes?
+	basePath = "/calculations/"
+	lenPath  = len(basePath)
 )
 
 var (
@@ -31,31 +30,29 @@ var (
 		"lang": models.GetLanguage,
 	}
 	// Templates
-	baseTmpl  = template.Must(template.ParseFiles("templates/base.html")).Funcs(funcMap)
-	indexTmpl = template.Must(baseTmpl.ParseFiles("templates/index.html"))
-	clients   = make(Clients)
+	baseTmpl     = template.Must(template.ParseFiles("templates/base.html")).Funcs(funcMap)
+	indexTmpl    = template.Must(baseTmpl.ParseFiles("templates/index.html"))
+	clients      = make(Clients, 0)
 	pollerSecret = os.Getenv("POLLER_SECRET")
 )
 
-type Clients map[string]*websocket.Conn
+type Clients []*websocket.Conn
 
-func (c *Clients) Prune() {
-	fmt.Println("Pruning dead clients")
-	fmt.Println("Number of clients:", len(*c))
-	for k, client := range *c {
-		err := websocket.Message.Send(client, "ping")
-		//error will be: use of closed network connection
-		if err != nil {
-			delete(*c, k)
-			fmt.Printf("Deleted %v from list of clients.\n", k)
-			fmt.Println(err)
+func (c *Clients) AddClient(ws *websocket.Conn) {
+	c = append(c, ws)
+}
+func (c *Clients) RemoveClient(ws *websocket.Conn) {
+	for i, client := range c {
+		if client == ws {
+			c = append(c[:i], c[i+1:]...)
+			return
 		}
 	}
 }
 
 func (c *Clients) SendAll(msg string, data interface{}) {
 	message := BuildMsg(msg, data)
-	for _, client := range *c {
+	for _, client := range c {
 		websocket.JSON.Send(client, message)
 	}
 }
@@ -100,22 +97,16 @@ func calculationsHandler(w http.ResponseWriter, r *http.Request) {
 
 // set a read deadline here probably
 func websocketHandler(ws *websocket.Conn) {
-	fmt.Println("Connected client")
-	ip := ws.Request().RemoteAddr
-	_, ok := clients[ip]
-	if ok {
-		websocket.JSON.Send(ws, BuildMsg("error", "Your IP is already connected"))
-		ws.Close()
-		return
-	}
-	clients[ip] = ws
+	defer ws.Close()
+	clients.AddClient(ws)
+	defer clients.RemoveClient(ws)
 	for {
 		var msg string
+		// Just chill. We don't expect to be receiving any messages.
 		err := websocket.Message.Receive(ws, &msg)
 		if err != nil {
 			break
 		}
-		fmt.Println("Message Got: ", msg)
 	}
 }
 
@@ -125,12 +116,12 @@ func pollerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	/*
-	secret := r.PostFormValue("secret")
-	if secret != pollerSecret {
-		time.Sleep(time.Second)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	}
+		secret := r.PostFormValue("secret")
+		if secret != pollerSecret {
+			time.Sleep(time.Second)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
 	*/
 	id := r.PostFormValue("calculationId")
 	calc, _ := models.Get(id)
@@ -138,15 +129,6 @@ func pollerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Might just be able to get rid of this entirely with ReadWriteDeadline or something?
-	go func() {
-		for {
-			time.Sleep(pruneEvery * time.Second)
-			if len(clients) > 0 {
-				clients.Prune()
-			}
-		}
-	}()
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/calculations", calculationsHandler)
 	http.Handle("/websock", websocket.Handler(websocketHandler))
